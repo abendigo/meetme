@@ -6,42 +6,95 @@
 
     <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
 
+    <link rel="import" href="bower_components/paper-progress/paper-progress.html">
     <link rel="import" href="bower_components/paper-input/paper-input.html">
     <link rel="import" href="bower_components/gold-email-input/gold-email-input.html">
+    <link rel="import" href="bower_components/paper-button/paper-button.html">
   </head>
   <body>
+    <paper-progress id="progress" value="0" secondary-progress="1" max="4"></paper-progress>
+    <p style="font-family: Roboto, Noto, sans-serif;">In order to register, I need to ask you 4 questions:</p>
     <paper-input label="First, what should I call you?"
         autocomplete="name"
         autofocus
+        error-message="Error Message!"
         id="name"
+        name="name"
         required
         type="text"></paper-input>
-      <gold-email-input label="Next, I need your email address"
+    <gold-email-input label="Next, I need your email address."
         autocomplete="email"
         autoValidate=true
         id="email"
+        name="email"
         style="visibility: hidden;"
+        type="email"
         required></gold-email-input>
+    <paper-input label="Awesome, now Choose a password."
+        id="password"
+        name="password"
+        style="visibility: hidden;"
+        type="password"
+        required></paper-input>
+    <paper-input label="And finally, verify your password!"
+        id="verifypassword"
+        name="verifypassword"
+        style="visibility: hidden;"
+        type="password"
+        required></paper-input>
+    <div id="buttons" style="visibility: hidden;">
+      <p style="font-family: Roboto, Noto, sans-serif;">
+      Fantastic, thats all I need. If you like, you can fill in some optional
+      biographical information, or you can finalize registration now, and fill 
+      that other stuff in later (or never).
+      </p>
+      <paper-button raised>Profile</paper-button>
+      <paper-button raised id="register">Register</paper-button>
+    </div>
 
     <script>
-      function onChange() {
-        console.log('onChange');
-      }
       document.addEventListener('WebComponentsReady', function() {
         console.log('WebComponentsReady');
 
+        var progressElement = document.getElementById('progress');
         var nameElement = document.getElementById('name');
         var emailElement = document.getElementById('email');
-        nameElement.addEventListener('keypress', function() {
-          console.log('keypress', arguments);
-        })
+        var passwordElement = document.getElementById('password');
+        var verifyElement = document.getElementById('verifypassword');
+        var buttonsElement = document.getElementById('buttons');
+        var registerButton = document.getElementById('register');
+
+        nameElement.addEventListener('keypress', function(event) {
+          console.log('keypress', event);
+//          if (event.)
+//          nameElement.invalid = true;
+        });
         nameElement.addEventListener('change', function() {
-          console.log('change', arguments);
-          console.log('xx', emailElement.label);
-          emailElement.label = 'Thanks Dave! ' + emailElement.label;
-          console.log('xx', emailElement.label);
+          // emailElement.label = 'Thanks Dave! ' + emailElement.label;
           emailElement.style.visibility = "visible";
-        })
+          emailElement.focus();
+          progress.value = "1";
+          progress.secondaryProgress = "2";
+        });
+
+        emailElement.addEventListener('change', function() {
+          passwordElement.style.visibility = "visible";
+          passwordElement.focus();
+          progress.value = "2";
+          progress.secondaryProgress = "3";
+        });
+        passwordElement.addEventListener('change', function() {
+          verifyElement.style.visibility = "visible";
+          verifyElement.focus();
+          progress.value = "3";
+          progress.secondaryProgress = "4";
+        });
+
+        verifyElement.addEventListener('change', function() {
+          buttonsElement.style.visibility = "visible";
+          registerButton.focus();
+          progress.value = "4";
+        });
       });
     </script>
   </body>
