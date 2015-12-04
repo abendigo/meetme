@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Paper Input Example</title>
+
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="bower_components/paper-input/paper-input.html">
+    <link rel="import" href="bower_components/gold-email-input/gold-email-input.html">
+  </head>
+  <body>
+    <paper-input label="First, what should I call you?"
+        autocomplete="name"
+        autofocus
+        id="name"
+        required
+        type="text"></paper-input>
+      <gold-email-input label="Next, I need your email address"
+        autocomplete="email"
+        autoValidate=true
+        id="email"
+        style="visibility: hidden;"
+        required></gold-email-input>
+
+    <script>
+      function onChange() {
+        console.log('onChange');
+      }
+      document.addEventListener('WebComponentsReady', function() {
+        console.log('WebComponentsReady');
+
+        var nameElement = document.getElementById('name');
+        var emailElement = document.getElementById('email');
+        nameElement.addEventListener('keypress', function() {
+          console.log('keypress', arguments);
+        })
+        nameElement.addEventListener('change', function() {
+          console.log('change', arguments);
+          console.log('xx', emailElement.label);
+          emailElement.label = 'Thanks Dave! ' + emailElement.label;
+          console.log('xx', emailElement.label);
+          emailElement.style.visibility = "visible";
+        })
+      });
+    </script>
+  </body>
+</html>
