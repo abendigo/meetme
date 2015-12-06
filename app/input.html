@@ -6,94 +6,217 @@
 
     <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
 
+    <link rel="import" href="bower_components/iron-form/iron-form.html">
     <link rel="import" href="bower_components/paper-progress/paper-progress.html">
     <link rel="import" href="bower_components/paper-input/paper-input.html">
     <link rel="import" href="bower_components/gold-email-input/gold-email-input.html">
     <link rel="import" href="bower_components/paper-button/paper-button.html">
+
+    <script>
+      var validator = {
+        validatorName: 'my-custom-validator',
+        validatorType: 'validator',
+        validate: function(value) {
+          console.log('my-custom-validator', value);
+          return true;
+        }
+      };
+      new Polymer.IronMeta({
+        type: validator.validatorType,
+        key: validator.validatorName,
+        value: validator
+      });
+/*
+      <paper-input label="First, what should I call you?"
+          autocomplete="name"
+          autofocus="true"
+          error-message="Please tell us your name!"
+          validator="my-custom-validator"
+          id="name"
+          name="name"
+          required
+          type="text"></paper-input>
+*/
+    </script>
+
+    <style>
+      body {
+        font-family: Roboto, Noto, sans-serif;
+      }
+
+      ul {
+        font-size: smaller;
+      }
+    </style>
   </head>
   <body>
     <paper-progress id="progress" value="0" secondary-progress="1" max="4"></paper-progress>
-    <p style="font-family: Roboto, Noto, sans-serif;">In order to register, I need to ask you 4 questions:</p>
-    <paper-input label="First, what should I call you?"
-        autocomplete="name"
-        autofocus
-        error-message="Error Message!"
-        id="name"
-        name="name"
-        required
-        type="text"></paper-input>
-    <gold-email-input label="Next, I need your email address."
-        autocomplete="email"
-        autoValidate=true
-        id="email"
-        name="email"
-        style="visibility: hidden;"
-        type="email"
-        required></gold-email-input>
-    <paper-input label="Awesome, now Choose a password."
-        id="password"
-        name="password"
-        style="visibility: hidden;"
-        type="password"
-        required></paper-input>
-    <paper-input label="And finally, verify your password!"
-        id="verifypassword"
-        name="verifypassword"
-        style="visibility: hidden;"
-        type="password"
-        required></paper-input>
-    <div id="buttons" style="visibility: hidden;">
-      <p style="font-family: Roboto, Noto, sans-serif;">
-      Fantastic, thats all I need. If you like, you can fill in some optional
-      biographical information, or you can finalize registration now, and fill 
-      that other stuff in later (or never).
-      </p>
-      <paper-button raised>Profile</paper-button>
-      <paper-button raised id="register">Register</paper-button>
-    </div>
+    <p>In order to register, I need to ask you 4 questions:</p>
+    <form id="form" is="iron-form">
+      <paper-input label="First, what should I call you?"
+          autocomplete="name"
+          autofocus="true"
+          error-message="Please tell us your name!"
+          id="name"
+          name="name"
+          required
+          type="text"></paper-input>
+      <gold-email-input label="Next, I need your email address."
+          autocomplete="email"
+          error-message="Please enter a valid email address."
+          id="email"
+          name="email"
+          style="visibility: hidden;"
+          type="email"
+          required></gold-email-input>
+      <paper-input label="Awesome, now Choose a password."
+          id="password"
+          style="visibility: hidden;"
+          type="password"
+          required></paper-input>
+      <ul id="please"
+         style="visibility: hidden;">
+        <li id="error-len">It must be at least 8 characters long.</li>
+        <li id="error-letter">It must contain at least one letter,</li>
+        <li id="error-digit">one digit,</li>
+        <li id="error-special">and one special character (!@#$%^& or *).</li>
+      </ul>
+      <paper-input label="And finally, verify your password!"
+          error-message="Passwords must match."
+          id="verifypassword"
+          style="visibility: hidden;"
+          type="password"
+          required></paper-input>
+      <div id="buttons" style="visibility: hidden;">
+        <p>
+        Fantastic, thats all I need. If you like, you can fill in some optional
+        biographical information, or you can finalize registration now, and fill 
+        that other stuff in later (or never).
+        </p>
+        <paper-button raised>Profile</paper-button>
+        <paper-button raised onClick="onSubmit()" id="register">Register</paper-button>
+      </div>
+    </form>
 
     <script>
+      var progressElement = document.getElementById('progress');
+      var nameElement = document.getElementById('name');
+      var emailElement = document.getElementById('email');
+      var passwordElement = document.getElementById('password');
+      var pleaseElement = document.getElementById('please');
+      var verifyElement = document.getElementById('verifypassword');
+      var buttonsElement = document.getElementById('buttons');
+      var registerButton = document.getElementById('register');
+
+      var errorLength = document.getElementById('error-len');
+      var errorLetter = document.getElementById('error-letter');
+      var errorDigit = document.getElementById('error-digit');
+      var errorSpecial = document.getElementById('error-special');
+
+      function onSubmit() {
+        document.getElementById('form').submit();
+      }
+
+      var valid = {
+        name: false,
+        email: false,
+        password: false,
+        verify: false
+      };
+
+      function updateProgressBar() {
+        var count = 0;
+        for (var key in valid) {
+          if (valid[key] === true)
+            count += 1;
+        }
+
+        progress.value = count;
+        progress.secondaryProgress = count + 1;
+      }
+
       document.addEventListener('WebComponentsReady', function() {
         console.log('WebComponentsReady');
 
-        var progressElement = document.getElementById('progress');
-        var nameElement = document.getElementById('name');
-        var emailElement = document.getElementById('email');
-        var passwordElement = document.getElementById('password');
-        var verifyElement = document.getElementById('verifypassword');
-        var buttonsElement = document.getElementById('buttons');
-        var registerButton = document.getElementById('register');
-
         nameElement.addEventListener('keypress', function(event) {
-          console.log('keypress', event);
-//          if (event.)
-//          nameElement.invalid = true;
+          nameElement.invalid = false;
+          if (event.charCode === 13) {
+            nameElement.fire('change');
+          }
         });
         nameElement.addEventListener('change', function() {
           // emailElement.label = 'Thanks Dave! ' + emailElement.label;
-          emailElement.style.visibility = "visible";
-          emailElement.focus();
-          progress.value = "1";
-          progress.secondaryProgress = "2";
+          console.log(nameElement.value)
+          valid.name = nameElement.validate();
+          if (valid.name) {
+            emailElement.style.visibility = "visible";
+            emailElement.focus();
+          }
+          updateProgressBar();
         });
 
         emailElement.addEventListener('change', function() {
-          passwordElement.style.visibility = "visible";
-          passwordElement.focus();
-          progress.value = "2";
-          progress.secondaryProgress = "3";
+          valid.email = emailElement.validate();
+          if (valid.email) {
+            passwordElement.style.visibility = "visible";
+            pleaseElement.style.visibility = "visible";
+            passwordElement.focus();
+          }
+          updateProgressBar();
         });
         passwordElement.addEventListener('change', function() {
-          verifyElement.style.visibility = "visible";
-          verifyElement.focus();
-          progress.value = "3";
-          progress.secondaryProgress = "4";
+          var password = passwordElement.value;
+          valid.password = true;
+
+          if (password.length < 8) {
+            errorLength.style.color = 'red';
+            valid.password = false;
+          } else {
+            errorLength.style.color = 'green';
+          }
+
+          if (!/[a-zA-Z]/g.test(password)) {
+            errorLetter.style.color = 'red';
+            valid.password = false;
+          } else {
+            errorLetter.style.color = 'green';
+          }
+
+          if (!/\d/g.test(password)) {
+            errorDigit.style.color = 'red';
+            valid.password = false;
+          } else {
+            errorDigit.style.color = 'green';
+          }
+
+          if (!/[\!\@\#\$\%\^\&\*]/g.test(password)) {
+            errorSpecial.style.color = 'red';
+            valid.password = false;
+          } else {
+            errorSpecial.style.color = 'green';
+          }
+
+          passwordElement.invalid = !valid.password;
+          if (valid.password) {
+            verifyElement.style.visibility = "visible";
+            verifyElement.focus();
+          }
+          updateProgressBar();
         });
 
         verifyElement.addEventListener('change', function() {
-          buttonsElement.style.visibility = "visible";
-          registerButton.focus();
-          progress.value = "4";
+//          valid.verify = verifyElement.validate();
+          if (passwordElement.value && verifyElement.value &&
+              passwordElement.value == verifyElement.value) {
+            verifyElement.invalid = false;
+            valid.verify = true;
+            buttonsElement.style.visibility = "visible";
+            registerButton.focus();
+          } else {
+            verifyElement.invalid = true;
+            valid.verify = false;
+          }
+          updateProgressBar();
         });
       });
     </script>
