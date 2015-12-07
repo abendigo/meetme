@@ -1,0 +1,25 @@
+{
+  "name": "meetme",
+  "version": "1.0.0",
+  "description": "UDACITY - Building High Conversion Web Forms - Final Project",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abendigo/meetme.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abendigo/meetme/issues"
+  },
+  "homepage": "https://github.com/abendigo/meetme#readme",
+  "devDependencies": {
+    "gulp-gh-pages": "^0.5.4"
+  }
+}
