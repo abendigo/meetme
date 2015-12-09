@@ -6,5 +6,5 @@ before_script:
   - bower install
 script: gulp vulcanize
 after_success:
-  - firebase deploy --email $(FIREBASE_USERNAME} --password ${FIREBASE_PASSWORD}
+  - firebase deploy --token "${FIREBASE_TOKEN}"
 
