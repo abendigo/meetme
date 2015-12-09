@@ -4,7 +4,7 @@ node_js:
 before_script:
   - npm install -g firebase-tools gulp bower
   - bower install
-scrupt: gulp vulcanize
+script: gulp vulcanize
 after_success:
   - firebase deploy --email $(FIREBASE_USERNAME} --password ${FIREBASE_PASSWORD}
 
