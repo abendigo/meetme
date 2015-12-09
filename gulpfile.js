@@ -1,5 +1,4 @@
 var gulp = require('gulp');
-var debug = require('gulp-debug');
 var ghPages = require('gulp-gh-pages');
 var size = require('gulp-size');
 var vulcanize = require('gulp-vulcanize');
@@ -16,7 +15,6 @@ gulp.task('deploy', function() {
 
 gulp.task('vulcanize', function() {
     return gulp.src('app/index.html')
-        .pipe(debug())
         .pipe(size({
             showFIles: true,
             title: 'src'
