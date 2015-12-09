@@ -1,0 +1,24 @@
+<link rel="import" href="../../bower_components/firebase-element/firebase-collection.html">
+<!--link rel="import" href="../../bower-components/iron-localstorage/iron-localstorage.html"-->
+
+<dom-module id="event-data">
+  <template>
+    <firebase-collection location="https://m13d-meetme.firebaseio.com/events"
+      data="{{fbEvents}}"
+      on-firebase-value="_firebaseLoaded"></firebase-collection>
+  </template>
+  <script>
+    Polymer({
+      is: 'event-data',
+      properties: {
+        events: {
+          notify: true
+        }
+      },
+      _firebaseLoaded: function() {
+        console.log('_firebaseLoaded', this.fbEvents);
+        this.events = this.fbEvents;
+      }
+    });
+  </script>
+</dom-module>

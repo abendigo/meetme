@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MeetMe, Event Planning</title>
+
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="bower_components/page/page.js"></script>
+
+    <link rel="import" href="bower_components/firebase-element/firebase-auth.html">
+
+    <link rel="import" href="elements/event-data/event-data.html">
+    <link rel="import" href="bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+    <link rel="import" href="bower_components/app-layout/app-header-layout/app-header-layout.html">
+    <link rel="import" href="bower_components/app-layout/app-header/app-header.html">
+    <link rel="import" href="bower_components/app-layout/app-toolbar/app-toolbar.html">
+
+    <link rel="import" href="bower_components/iron-pages/iron-pages.html">
+    <link rel="import" href="bower_components/iron-icons/iron-icons.html">
+    <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="bower_components/paper-card/paper-card.html">
+
+    <style>
+      .cards {
+        display: flex;
+        flex-direction: column;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      paper-card {
+        margin-bottom: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <template is="dom-bind" id="my-template">
+      <firebase-auth id="firebaseLogin" 
+        user="{{user}}" 
+        status-known="{{statusKnown}}" 
+        location="https://m13d-meetme.firebaseio.com"
+        provider="password"
+        on-error="onError"
+        on-login="onSuccess"
+        on-logout="onSuccess">
+      </firebase-auth>
+      <event-data events="{{events}}"></event-data>
+      <app-drawer-layout id="myLayout" drawer-width="288px" responsive-width="788px">
+        <div id="menuDrawer" drawer>Drawer
+          <ul>
+            <li><a href="./welcome">Welcome</a></li>
+            <li><a href="./login">Login</a></li>
+            <li><a href="./register">Register</a></li>
+            <li><a href="./create">Create Event</a></li>
+            <li><a href="./list">List Events</a></li>
+          </ul>
+        </div>
+        <app-header-layout main>
+          <app-header>
+            <app-toolbar>
+              <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+            </app-toolbar>
+          </app-header>
+          <div>Main
+            Route: [[route]]
+            <iron-pages attr-for-selected="data-route" selected="[[route]]">
+              <div data-route="welcome">Page Zero
+                <div>email: [[params.email]]</div>
+                <div>password: [[params.password]]</div>
+                <div>status: [[statusKnown]]</div>
+                <div>user: [[user.uid]]</div>
+              </div>
+              <div data-route="login">Page One
+                <button on-tap="login">login</button>
+              </div>
+              <div data-route="register">Page Two
+                <button on-tap="logout">logout</button>
+              </div>
+              <div data-route="create">Page Three</div>
+              <div data-route="list">Page Five
+                <div class="cards">
+                  <template is="dom-repeat" items=[[items]]>
+                    <paper-card heading=[[item.name]]>
+                      {{item.type}}
+                      <template is="dom-repeat" items=[[item.guests]]>
+                        <div><span>[[item.name]]</span><span>[[item.email]]</span></div>
+                      </template>
+                    </paper-card>
+                  </template>
+                </div>
+              </div>
+            </iron-pages>
+          </div>
+        </app-header-layout>
+      </app-drawer-layout>
+    </template>
+    <script>
+      // document.addEventListener('click', function(e) {
+      //   var pages = document.querySelector('iron-pages');
+      //   pages.selectNext();
+      // });
+      document.addEventListener('WebComponentsReady', function() {
+        var template = document.getElementById('my-template');
+        var fbLogin = document.getElementById('firebaseLogin');
+        template.params = {email: 'mark@oosterveld.org', password: 'password'};
+
+        console.log(template.$.firebaseLogin);
+        console.log(fbLogin)
+
+        template.items = [
+          {name: 'Dave\'s Birthday',
+           type: 'Birthday Party',
+           host: 'Dave\'s Mom',
+           start: 1234567890,
+           end:   1234567890,
+           guests: [
+             {name: 'dave', email: 'a@a.a'},
+             {name: 'bill', email: 'b@b.b'}],
+           location: 'dave\'s mom\'s house',
+           message: 'Don\'t tell dave, it\'s a surprise.'},
+          {type: 'Divorce Party'},
+          {name: 'three'},
+        ];
+//        template.user = "marko";
+        template.login = function() {
+          console.log('login', this);
+          fbLogin.login({email: 'mark@oosterveld.org', password: 'password'});
+        };
+        template.logout = function() {
+          console.log('logout', this);
+          fbLogin.logout();
+        };
+        template.onError = function(e) {
+          console.log('onError', e);
+        };
+        template.onSuccess = function(e) {
+          console.log('onSuccess', e);
+        };
+
+        console.log('ready', template.statusKnown);
+
+
+
+
+        page('/welcome', function() {
+          template.route = 'welcome';
+          template.$.myLayout.opened = false;
+        });
+        page('/login', function() {
+          template.route = 'login';
+          template.$.myLayout.opened = false;
+        });
+        page('/register', function() {
+          template.route = 'register';
+          template.$.myLayout.opened = false;
+        });
+        page('/create', function() {
+          template.route = 'create';
+          template.$.myLayout.opened = false;
+        });
+        page('/list', function() {
+          template.route = 'list';
+          template.$.myLayout.opened = false;
+        });
+
+        page('*', function() {
+          console.log('fallthrough', arguments)
+        })
+        page({
+          click: true,
+          hashbang: true});
+      });      
+    </script>
+  </body>
+</html>
