@@ -10,6 +10,9 @@
     <link rel="import" href="bower_components/firebase-element/firebase-auth.html">
 
     <link rel="import" href="elements/event-data/event-data.html">
+    <link rel="import" href="elements/event-list/event-list.html">
+    <link rel="import" href="elements/event-register/event-register.html">
+
     <link rel="import" href="bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
     <link rel="import" href="bower_components/app-layout/app-header-layout/app-header-layout.html">
     <link rel="import" href="bower_components/app-layout/app-header/app-header.html">
@@ -23,14 +26,15 @@
     <style>
       .cards {
         display: flex;
-        flex-direction: column;
-        max-width: 400px;
+        flex-direction: row;
+        flex-wrap: wrap;
         margin-left: auto;
         margin-right: auto;
       }
 
       paper-card {
         margin-bottom: 16px;
+        min-width: 400px;
       }
     </style>
   </head>
@@ -46,8 +50,8 @@
         on-logout="onSuccess">
       </firebase-auth>
       <event-data events="{{events}}"></event-data>
-      <app-drawer-layout id="myLayout" drawer-width="288px" responsive-width="788px">
-        <div id="menuDrawer" drawer>Drawer
+      <app-drawer-layout id="myLayout" drawer-width="288px" responsive-width="900px">
+        <div id="menuDrawer" drawer>
           <ul>
             <li><a href="./welcome">Welcome</a></li>
             <li><a href="./login">Login</a></li>
@@ -62,8 +66,6 @@
               <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             </app-toolbar>
           </app-header>
-          <div>Main
-            Route: [[route]]
             <iron-pages attr-for-selected="data-route" selected="[[route]]">
               <div data-route="welcome">Page Zero
                 <div>email: [[params.email]]</div>
@@ -74,24 +76,10 @@
               <div data-route="login">Page One
                 <button on-tap="login">login</button>
               </div>
-              <div data-route="register">Page Two
-                <button on-tap="logout">logout</button>
-              </div>
+              <event-register data-route="register"></event-register>
               <div data-route="create">Page Three</div>
-              <div data-route="list">Page Five
-                <div class="cards">
-                  <template is="dom-repeat" items=[[items]]>
-                    <paper-card heading=[[item.name]]>
-                      {{item.type}}
-                      <template is="dom-repeat" items=[[item.guests]]>
-                        <div><span>[[item.name]]</span><span>[[item.email]]</span></div>
-                      </template>
-                    </paper-card>
-                  </template>
-                </div>
-              </div>
+              <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
-          </div>
         </app-header-layout>
       </app-drawer-layout>
     </template>
