@@ -1,5 +1,7 @@
 UDACITY - Building High Conversion Web Forms - Final Project
 
+[![Build Status](https://travis-ci.org/abendigo/meetme.svg)](https://travis-ci.org/abendigo/meetme)
+
 This is my Meet-Up Event Planner, for the UDACITY Course,
 [Building High Conversion Web Forms][1], part of the 
 [Senior Web Developer Nanodegree program][2]
