@@ -1,0 +1,52 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/gold-email-input/gold-email-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="event-create">
+  <template>
+    <style>
+    </style>
+    <paper-input label="Name of the event" autofocus required></paper-input>
+    <paper-input-container id="foo">
+      <label>Type of the event</label>
+      <input list="list" is="iron-input"></input>
+      <datalist id="list">
+        <option value='Birthday Party'></option>
+        <option value='Conference Talk'></option>
+        <option value='Wedding'></option>
+      </datalist>
+    </paper-input-container>
+    <paper-input label="Host (indivdual or organization)"></paper-input>
+    <paper-input-container always-float-label required>
+      <label>Start Date and Time</label>
+      <input is="iron-input" type="datetime-local"></input>
+    </paper-input-container>
+    <paper-input-container always-float-label>
+      <label>End Date and Time</label>
+      <input is="iron-input" type="datetime-local"></input>
+    </paper-input-container>
+    <paper-input label="Location" on-focus="geolocate"></paper-input>
+    <paper-textarea label="Message"></paper-textarea>
+    <paper-button raised>Create Event</paper-button>
+  </template>
+  <script>
+    Polymer({
+      is: 'event-create',
+
+      geolocate: function() {
+        console.log('geolocate');
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            console.log('position', position);
+          });
+        }
+      }
+
+    });
+  </script>
+</dom-module>

@@ -9,6 +9,7 @@
 
     <link rel="import" href="bower_components/firebase-element/firebase-auth.html">
 
+    <link rel="import" href="elements/event-create/event-create.html">
     <link rel="import" href="elements/event-data/event-data.html">
     <link rel="import" href="elements/event-list/event-list.html">
     <link rel="import" href="elements/event-register/event-register.html">
@@ -24,18 +25,6 @@
     <link rel="import" href="bower_components/paper-card/paper-card.html">
 
     <style>
-      .cards {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      paper-card {
-        margin-bottom: 16px;
-        min-width: 400px;
-      }
     </style>
   </head>
   <body>
@@ -56,6 +45,7 @@
             <li><a href="./welcome">Welcome</a></li>
             <li><a href="./login">Login</a></li>
             <li><a href="./register">Register</a></li>
+            <li><a href="./profile">Profile</a></li>
             <li><a href="./create">Create Event</a></li>
             <li><a href="./list">List Events</a></li>
           </ul>
@@ -67,17 +57,14 @@
             </app-toolbar>
           </app-header>
             <iron-pages attr-for-selected="data-route" selected="[[route]]">
-              <div data-route="welcome">Page Zero
-                <div>email: [[params.email]]</div>
-                <div>password: [[params.password]]</div>
-                <div>status: [[statusKnown]]</div>
-                <div>user: [[user.uid]]</div>
+              <div data-route="welcome">
+                <h1>Welcome!</h1>
               </div>
               <div data-route="login">Page One
                 <button on-tap="login">login</button>
               </div>
-              <event-register data-route="register"></event-register>
-              <div data-route="create">Page Three</div>
+              <event-register data-route="register" on-kick="onKick"></event-register>
+              <event-create data-route="create"></event-create>
               <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
         </app-header-layout>
@@ -96,20 +83,6 @@
         console.log(template.$.firebaseLogin);
         console.log(fbLogin)
 
-        template.items = [
-          {name: 'Dave\'s Birthday',
-           type: 'Birthday Party',
-           host: 'Dave\'s Mom',
-           start: 1234567890,
-           end:   1234567890,
-           guests: [
-             {name: 'dave', email: 'a@a.a'},
-             {name: 'bill', email: 'b@b.b'}],
-           location: 'dave\'s mom\'s house',
-           message: 'Don\'t tell dave, it\'s a surprise.'},
-          {type: 'Divorce Party'},
-          {name: 'three'},
-        ];
 //        template.user = "marko";
         template.login = function() {
           console.log('login', this);
@@ -125,6 +98,25 @@
         template.onSuccess = function(e) {
           console.log('onSuccess', e);
         };
+
+        template.onKick = function(e, data) {
+          console.log('on kick', data);
+
+          function userCreated() {
+            console.log('user created', arguments);
+            data.callback();
+
+            fbLogin.removeEventListener('user-created', userCreated);
+          }
+          fbLogin.addEventListener('user-created', userCreated);
+
+          template.onError = function(event, error) {
+            console.log('create user error', error);
+            data.callback(error);
+          }
+          fbLogin.createUser(data.email, data.password);
+//          data.callback('processing');
+        }
 
         console.log('ready', template.statusKnown);
 

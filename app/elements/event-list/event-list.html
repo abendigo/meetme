@@ -5,6 +5,18 @@
 <dom-module id="event-list">
   <template>
     <style>
+      .cards {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      paper-card {
+        margin-bottom: 16px;
+        min-width: 400px;
+      }
     </style>
       <div class="cards">
         <template is="dom-repeat" items=[[events]]>
@@ -23,8 +35,12 @@
 
       properties: {
         events: {
-          type: Object
+          type: Object,
+          observer: '_observer'
         }
+      },
+      _observer: function(a, old) {
+        console.log('_observer', arguments);
       }
     });
   </script>

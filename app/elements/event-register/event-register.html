@@ -60,8 +60,9 @@
         biographical information, or you can finalize registration now, and fill 
         that other stuff in later (or never).
         </p>
+        <div id="errormessage">[[errorMessage]]</div>
         <paper-button raised>Profile</paper-button>
-        <paper-button raised on-click="onSubmit()" id="register">Register</paper-button>
+        <paper-button raised on-click="onSubmit" id="register">Register</paper-button>
       </div>
     </form>
   </template>
@@ -93,6 +94,14 @@
           this.$.email.focus();
         }
         this.updateProgressBar();
+
+      // this.$.email.style.visibility = "visible";
+      // this.$.password.style.visibility = "visible";
+      // this.$.please.style.visibility = "visible";
+      // this.$.verify.style.visibility = "visible";
+      // this.$.buttons.style.visibility = "visible";
+      // this.errorMessage = "Error Message"
+
       },
       _onChangeEmail: function() {
         this._valid.email = this.$.email.validate();
@@ -155,6 +164,20 @@
             this._valid.verify = false;
           }
           this.updateProgressBar();
+      },
+      onSubmit: function() {
+        console.log('on submit');
+        var that = this;
+        this.$.errormessage.innerHtml = "Processing...";
+        this.fire('kick', {
+          name: this.$.name.value,
+          email: this.$.email.value,
+          password: this.$.password.value,
+          callback: function(error) {
+            console.log('callback', error);
+            that.errorMessage = error.message;
+          }
+        });
       }
     });
   </script>

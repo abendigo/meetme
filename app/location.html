@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="bower_components/google-apis/google-maps-api.html">
+    <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+  </head>
+  <body>
+    <template id="my-template" is="dom-bind">
+      <google-maps-api 
+        api-key="AIzaSyCG4L3RJu-Y4Yw31r63xaefYx0q1fBblbs" 
+        id="maps-api"
+        on-api-load="_onApiLoad"
+        version="3.exp"></google-maps-api>
+      <paper-input id="location" label="Location" on-focus="geolocate"></paper-input>
+      <paper-input id="locon" label="Location"></paper-input>
+      <input id="marko" type="text"></input>
+    </template>
+
+
+    <script>
+      // console.log('yo');
+      // window.initMap = function() {
+      //   console.log('initMap');
+      //   var location = document.getElementById('marko');
+      //   var autocomplete = new google.maps.places.Autocomplete(location, {types: ['geocode']});
+      // }
+
+      document.addEventListener('WebComponentsReady', function() {
+        var autocomplete;
+
+        console.log('ready');
+        var template = document.getElementById('my-template');
+        var location = document.getElementById('location');
+        var marko = document.getElementById('marko');
+        var api = document.getElementById('maps-api');
+
+        template._onApiLoad = function() {
+          console.log('onApiLoad');
+
+          autocomplete = new google.maps.places.Autocomplete(marko, {types: ['geocode']});
+          autocomplete.addListener('place_changed', function() {
+            console.log('place_chnaged', arguments);
+          });
+        }
+
+        template.geolocate = function() {
+          console.log("geolocate");
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              console.log('position', position);
+            });
+          }
+        }
+        // api.addEventListener('api-load', function(e) {
+        //   console.log('api loaded');
+        // })
+      });
+    </script>
+    <!--script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCG4L3RJu-Y4Yw31r63xaefYx0q1fBblbs&signed_in=true&libraries=places&callback=initMap"
+        async defer></script-->
+  </body>
+</html>
