@@ -1,0 +1,58 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/google-apis/google-maps-api.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+
+<dom-module id="input-location">
+  <template>
+    <style>
+    </style>
+    <google-maps-api 
+      api-key="AIzaSyCG4L3RJu-Y4Yw31r63xaefYx0q1fBblbs" 
+      id="maps-api"
+      on-api-load="_onApiLoad"
+      version="3.exp"></google-maps-api>
+    <paper-input id="location" label="[[label]]" on-focus="geolocate"></paper-input>
+  </template>
+  <script>
+    // This code is heavily influenced by lesson3-bigForm1-polymer, part of
+    // the instructor notes for UDACITY Building High Conversion Web Forms.
+    // In fact, some parts are copied verbatum
+
+    var autocomplete;
+
+    function createBoundsFromGeoposition(position) {
+      return new google.maps.Circle({
+        center: {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        },
+        radius: position.coords.accuracy
+      }).getBounds();
+    }
+
+    Polymer({
+      is: 'input-location',
+
+      properties: {
+        label: String
+      },
+
+      _onApiLoad: function() {
+        autocomplete = new google.maps.places.Autocomplete(this.$.location.$.input, {types: ['geocode']});
+      },
+
+      // Bias the autocomplete object to the user's geographical location,
+      // as supplied by the browser's 'navigator.geolocation' object.
+      geolocate: function() {
+        console.log('geolocate');
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            console.log('position', position);
+            autocomplete.setBounds(createBoundsFromGeoposition(position));
+          });
+        }
+      }
+    });
+  </script>
+</dome-module>

@@ -7,6 +7,8 @@
 <link rel="import" href="../../bower_components/gold-email-input/gold-email-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 
+<link rel="import" href="input-location.html">
+
 <dom-module id="event-create">
   <template>
     <style>
@@ -30,7 +32,7 @@
       <label>End Date and Time</label>
       <input is="iron-input" type="datetime-local"></input>
     </paper-input-container>
-    <paper-input label="Location" on-focus="geolocate"></paper-input>
+    <input-location label="Location"></input-location>
     <paper-textarea label="Message"></paper-textarea>
     <paper-button raised>Create Event</paper-button>
   </template>
@@ -38,14 +40,14 @@
     Polymer({
       is: 'event-create',
 
-      geolocate: function() {
-        console.log('geolocate');
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(function(position) {
-            console.log('position', position);
-          });
-        }
-      }
+      // geolocate: function() {
+      //   console.log('geolocate');
+      //   if (navigator.geolocation) {
+      //     navigator.geolocation.getCurrentPosition(function(position) {
+      //       console.log('position', position);
+      //     });
+      //   }
+      // }
 
     });
   </script>
