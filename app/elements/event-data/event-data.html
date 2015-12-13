@@ -1,12 +1,16 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/firebase-element/firebase-collection.html">
-<!--link rel="import" href="../../bower-components/iron-localstorage/iron-localstorage.html"-->
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 
 <dom-module id="event-data">
   <template>
-    <firebase-collection location="https://m13d-meetme.firebaseio.com/events"
+    <firebase-collection
       data="{{fbEvents}}"
+      location="https://m13d-meetme.firebaseio.com/events"
       on-firebase-value="_firebaseLoaded"></firebase-collection>
+    <iron-localstorage name="meetme-events"
+      on-iron-localstorage-load="_backupLoaded"
+      value="{{lsEvents}}"></iron-localstorage>
   </template>
   <script>
     Polymer({
@@ -14,11 +18,27 @@
       properties: {
         events: {
           notify: true
+        },
+        _firebaseConnected: {
+          value: false
         }
       },
       _firebaseLoaded: function() {
         console.log('_firebaseLoaded', this.fbEvents);
+        this._firebaseConnected = true;
+
         this.events = this.fbEvents;
+        this.lsEvents = this.fbEvents;
+
+        this.linkPaths('fbEvents', 'events');
+        this.linkPaths('lsEvents', 'events');
+      },
+      _backupLoaded: function() {
+        console.log('_backupLoaded', this.lsEvents);
+        // DO NOT overwrite if we are connected to Firebase!
+        if (!this._firebaseConnected) {
+          this.events = this.lsEvents.slice();
+        }
       }
     });
   </script>

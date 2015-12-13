@@ -7,12 +7,16 @@
   <template>
     <style>
     </style>
-    <google-maps-api 
-      api-key="AIzaSyCG4L3RJu-Y4Yw31r63xaefYx0q1fBblbs" 
+    <google-maps-api
+      api-key="AIzaSyCG4L3RJu-Y4Yw31r63xaefYx0q1fBblbs"
       id="maps-api"
       on-api-load="_onApiLoad"
       version="3.exp"></google-maps-api>
-    <paper-input id="location" label="[[label]]" on-focus="geolocate"></paper-input>
+    <paper-input
+      id="location"
+      label="[[label]]"
+      name="[[name]]"
+      on-focus="geolocate"></paper-input>
   </template>
   <script>
     // This code is heavily influenced by lesson3-bigForm1-polymer, part of
@@ -35,7 +39,8 @@
       is: 'input-location',
 
       properties: {
-        label: String
+        label: String,
+        name: String
       },
 
       _onApiLoad: function() {

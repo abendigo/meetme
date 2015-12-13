@@ -13,42 +13,93 @@
   <template>
     <style>
     </style>
-    <paper-input label="Name of the event" autofocus required></paper-input>
-    <paper-input-container id="foo">
-      <label>Type of the event</label>
-      <input list="list" is="iron-input"></input>
-      <datalist id="list">
-        <option value='Birthday Party'></option>
-        <option value='Conference Talk'></option>
-        <option value='Wedding'></option>
-      </datalist>
-    </paper-input-container>
-    <paper-input label="Host (indivdual or organization)"></paper-input>
-    <paper-input-container always-float-label required>
-      <label>Start Date and Time</label>
-      <input is="iron-input" type="datetime-local"></input>
-    </paper-input-container>
-    <paper-input-container always-float-label>
-      <label>End Date and Time</label>
-      <input is="iron-input" type="datetime-local"></input>
-    </paper-input-container>
-    <input-location label="Location"></input-location>
-    <paper-textarea label="Message"></paper-textarea>
-    <paper-button raised>Create Event</paper-button>
+    <form id="create-event" is="iron-form">
+      <paper-input
+        autofocus
+        error-message="The event needs a name!"
+        label="Name of the event (required)"
+        name="name"
+        required></paper-input>
+      <paper-input-container id="foo">
+        <label>Type of the event (optional)</label>
+        <input
+          is="iron-input"
+          list="list"
+          name="type"></input>
+        <datalist id="list">
+          <option value='Birthday Party'></option>
+          <option value='Conference Talk'></option>
+          <option value='Wedding'></option>
+        </datalist>
+      </paper-input-container>
+      <paper-input
+        label="Host (indivdual or organization) (optional)"
+        name="host"></paper-input>
+      <paper-input-container always-float-label>
+        <label>Start Date and Time (required)</label>
+        <input
+          is="iron-input"
+          name="start"
+          required
+          type="datetime-local"></input>
+      </paper-input-container>
+      <paper-input-container always-float-label>
+        <label>End Date and Time (optional)</label>
+        <input
+          is="iron-input"
+          name="end"
+          type="datetime-local"></input>
+      </paper-input-container>
+      <input-location
+        label="Location (optional)"
+        name="location"></input-location>
+      <paper-textarea
+        label="Message (optional)"
+        name="message"></paper-textarea>
+      <paper-button on-click="onSubmit" raised>Create Event</paper-button>
+    </form>
   </template>
   <script>
     Polymer({
       is: 'event-create',
 
-      // geolocate: function() {
-      //   console.log('geolocate');
-      //   if (navigator.geolocation) {
-      //     navigator.geolocation.getCurrentPosition(function(position) {
-      //       console.log('position', position);
-      //     });
-      //   }
-      // }
+      created: function() {
+        console.log(this.localName + '#' + this.id + ' was created');
+      },
 
+      ready: function() {
+        console.log(this.localName + '#' + this.id + ' was ready');
+        var form = this.$['create-event'];
+        form.addEventListener('iron-form-presubmit', function(event) {
+          event.preventDefault();
+          console.log('save to firebase', form.serialize());
+
+          this.fire('add-event', {
+            form: form.serialize(),
+            callback: function(error) {
+              console.log('error!', error);
+            }
+          })
+        });
+      },
+
+      attached: function() {
+        console.log(this.localName + '#' + this.id + ' was attached');
+      },
+
+      detached: function() {
+        console.log(this.localName + '#' + this.id + ' was detached');
+      },
+
+      attributeChanged: function(name, type) {
+        console.log(this.localName + '#' + this.id + ' attribute ' + name +
+          ' was changed to ' + this.getAttribute(name));
+      },
+
+      onSubmit: function() {
+        console.log('onSubmit');
+        this.$['create-event'].submit();
+      }
     });
   </script>
 </dom-module>

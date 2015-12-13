@@ -64,7 +64,7 @@
                 <button on-tap="login">login</button>
               </div>
               <event-register data-route="register" on-kick="onKick"></event-register>
-              <event-create data-route="create"></event-create>
+              <event-create data-route="create" on-add-event="onAddEvent"></event-create>
               <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
         </app-header-layout>
@@ -77,7 +77,7 @@
       // });
       document.addEventListener('WebComponentsReady', function() {
         var template = document.getElementById('my-template');
-        var fbLogin = document.getElementById('firebaseLogin');
+        var fbLogin = template.$.firebaseLogin; // document.getElementById('firebaseLogin');
         template.params = {email: 'mark@oosterveld.org', password: 'password'};
 
         console.log(template.$.firebaseLogin);
@@ -116,6 +116,11 @@
           }
           fbLogin.createUser(data.email, data.password);
 //          data.callback('processing');
+        }
+
+        template.onAddEvent = function(e, data) {
+          console.log('onAddEvent', data);
+          this.push('events', data.form);
         }
 
         console.log('ready', template.statusKnown);
