@@ -1,0 +1,29 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="input-guest-list">
+  <template>
+    <label>Guests</label>
+      <template is="dom-repeat" items=[[value]]>
+        <div><span>[[item.name]]</span><span>[[item.email]]</span><button>Del</button></div>
+      </template>
+    <input id="name" type="text"><input id="email" type="text"><button on-click="addGuest">Add</button>
+  </template>
+  <script>
+    Polymer({
+      is: 'input-guest-list',
+      behaviors: [Polymer.IronFormElementBehavior],
+
+      properties: {
+        value: {
+          type: Array,
+          value: []
+        }
+      },
+
+      addGuest: function(e) {
+        e.preventDefault();
+        this.push('value', {name: this.$.name.value, email: this.$.email.value})
+      }
+    });
+  </script>
+</dom-module>

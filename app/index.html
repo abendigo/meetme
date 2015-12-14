@@ -29,9 +29,9 @@
   </head>
   <body>
     <template is="dom-bind" id="my-template">
-      <firebase-auth id="firebaseLogin" 
-        user="{{user}}" 
-        status-known="{{statusKnown}}" 
+      <firebase-auth id="firebaseLogin"
+        user="{{user}}"
+        status-known="{{statusKnown}}"
         location="https://m13d-meetme.firebaseio.com"
         provider="password"
         on-error="onError"
@@ -43,15 +43,17 @@
         <div id="menuDrawer" drawer>
           <ul>
             <li><a href="./welcome">Welcome</a></li>
-            <li><a href="./login">Login</a></li>
-            <li><a href="./register">Register</a></li>
-            <li><a href="./profile">Profile</a></li>
-            <li><a href="./create">Create Event</a></li>
+            <li hidden$="{{user.uid}}"><a href="./login">Login</a></li>
+            <li hidden$="{{user.uid}}"><a href="./register">Register</a></li>
+            <li hidden$="{{!user.uid}}"><a href="./profile">Profile</a></li>
+            <li hidden$="{{!user.uid}}"><a href="./create">Create Event</a></li>
             <li><a href="./list">List Events</a></li>
+            <li hidden$="{{!user.uid}}"><button on-tap="logout">Logout</button></li>
           </ul>
         </div>
         <app-header-layout main>
           <app-header>
+          User: {{user}}
             <app-toolbar>
               <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             </app-toolbar>
@@ -121,6 +123,7 @@
         template.onAddEvent = function(e, data) {
           console.log('onAddEvent', data);
           this.push('events', data.form);
+          data.callback();
         }
 
         console.log('ready', template.statusKnown);
@@ -155,7 +158,7 @@
         page({
           click: true,
           hashbang: true});
-      });      
+      });
     </script>
   </body>
 </html>

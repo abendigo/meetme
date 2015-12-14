@@ -45,6 +45,10 @@
 
       _onApiLoad: function() {
         autocomplete = new google.maps.places.Autocomplete(this.$.location.$.input, {types: ['geocode']});
+
+        autocomplete.addListener('place_changed', function() {
+          console.log('place_changed', autocomplete.getPlace(), arguments);
+        })
       },
 
       // Bias the autocomplete object to the user's geographical location,
