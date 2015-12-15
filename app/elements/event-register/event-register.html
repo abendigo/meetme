@@ -13,7 +13,7 @@
     <paper-progress id="progress" value="0" secondary-progress="1" max="4"></paper-progress>
     <p>In order to register, I need to ask you 4 questions:</p>
     <form id="form" is="iron-form">
-      <paper-input 
+      <paper-input
         autocomplete="name"
         autofocus="true"
         error-message="Please tell us your name!"
@@ -23,7 +23,7 @@
         on-change="_onChangeName"
         required
         type="text"></paper-input>
-      <gold-email-input 
+      <gold-email-input
         autocomplete="email"
         error-message="Please enter a valid email address."
         id="email"
@@ -33,7 +33,7 @@
         style="visibility: hidden;"
         type="email"
         required></gold-email-input>
-      <paper-input 
+      <paper-input
         id="password"
         label="Awesome, now Choose a password."
         on-change="_onChangePassword"
@@ -46,7 +46,7 @@
         <li id="error-digit">one digit,</li>
         <li id="error-special">and one special character (!@#$%^& or *).</li>
       </ul>
-      <paper-input 
+      <paper-input
         error-message="Passwords must match."
         id="verify"
         label="And finally, verify your password!"
@@ -57,7 +57,7 @@
       <div id="buttons" style="visibility: hidden;">
         <p>
         Fantastic, thats all I need. If you like, you can fill in some optional
-        biographical information, or you can finalize registration now, and fill 
+        biographical information, or you can finalize registration now, and fill
         that other stuff in later (or never).
         </p>
         <div id="errormessage">[[errorMessage]]</div>
@@ -69,6 +69,10 @@
   <script>
     Polymer({
       is: 'event-register',
+
+      properties: {
+        callback: Function
+      },
 
       _valid: {
         name: false,
@@ -169,15 +173,30 @@
         console.log('on submit');
         var that = this;
         this.$.errormessage.innerHtml = "Processing...";
-        this.fire('kick', {
+        this.callback({
           name: this.$.name.value,
           email: this.$.email.value,
-          password: this.$.password.value,
-          callback: function(error) {
-            console.log('callback', error);
+          password: this.$.password.value
+        }, function(error) {
+          console.log('callback', error);
+          if (error) {
             that.errorMessage = error.message;
+          } else {
+            that.$.name.value = "";
+            that.$.email.value = "";
+            that.$.password.value="";
+            that.$.verify.value = "";
           }
         });
+        // this.fire('kick', {
+        //   name: this.$.name.value,
+        //   email: this.$.email.value,
+        //   password: this.$.password.value,
+        //   callback: function(error) {
+        //     console.log('callback', error);
+        //     that.errorMessage = error.message;
+        //   }
+        // });
       }
     });
   </script>

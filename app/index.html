@@ -13,6 +13,7 @@
     <link rel="import" href="elements/event-data/event-data.html">
     <link rel="import" href="elements/event-list/event-list.html">
     <link rel="import" href="elements/event-register/event-register.html">
+    <link rel="import" href="elements/profile-data/profile-data.html">
 
     <link rel="import" href="bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
     <link rel="import" href="bower_components/app-layout/app-header-layout/app-header-layout.html">
@@ -20,11 +21,41 @@
     <link rel="import" href="bower_components/app-layout/app-toolbar/app-toolbar.html">
 
     <link rel="import" href="bower_components/iron-pages/iron-pages.html">
+    <link rel="import" href="bower_components/iron-icons/editor-icons.html">
     <link rel="import" href="bower_components/iron-icons/iron-icons.html">
+    <link rel="import" href="bower_components/iron-icon/iron-icon.html">
+
+    <link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout.html">
+
     <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
     <link rel="import" href="bower_components/paper-card/paper-card.html">
+    <link rel="import" href="bower_components/paper-menu/paper-menu.html">
+    <link rel="import" href="bower_components/paper-item/paper-item.html">
 
-    <style>
+    <style is="custom-style">
+  paper-menu iron-icon {
+    margin-right: 33px;
+    opacity: 0.54;
+  }
+
+  .paper-menu > .iron-selected {
+    color: var(--default-primary-color);
+  }
+
+  paper-menu a {
+    @apply(--layout-horizontal);
+    @apply(--layout-center);
+    text-decoration: none;
+    color: var(--menu-link-color);
+    font-family: 'Roboto', 'Noto', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 24px;
+    min-height: 48px;
+    padding: 0 16px;
+  }
     </style>
   </head>
   <body>
@@ -33,23 +64,45 @@
         user="{{user}}"
         status-known="{{statusKnown}}"
         location="https://m13d-meetme.firebaseio.com"
-        provider="password"
-        on-error="onError"
-        on-login="onSuccess"
-        on-logout="onSuccess">
+        provider="password">
       </firebase-auth>
+      <profile-data id="profileData"
+        location="https://m13d-meetme.firebaseio.com"
+        profile="{{profile}}"
+        user="[[user]]"></profile-data>
       <event-data events="{{events}}"></event-data>
       <app-drawer-layout id="myLayout" drawer-width="288px" responsive-width="900px">
         <div id="menuDrawer" drawer>
-          <ul>
-            <li><a href="./welcome">Welcome</a></li>
-            <li hidden$="{{user.uid}}"><a href="./login">Login</a></li>
-            <li hidden$="{{user.uid}}"><a href="./register">Register</a></li>
-            <li hidden$="{{!user.uid}}"><a href="./profile">Profile</a></li>
-            <li hidden$="{{!user.uid}}"><a href="./create">Create Event</a></li>
-            <li><a href="./list">List Events</a></li>
-            <li hidden$="{{!user.uid}}"><button on-tap="logout">Logout</button></li>
-          </ul>
+          <paper-menu attr-for-selected="data-route" selected="[[route]]">
+            <a date-route="welcome" href="/welcome">
+              <iron-icon icon="home"></iron-icon>
+              <span>Welcome</span>
+            </a>
+            <a date-route="login" href="/login" hidden$="[[user.uid]]">
+              <iron-icon icon="face"></iron-icon>
+              <span>Login</span>
+            </a>
+            <a date-route="register" href="/register" hidden$="[[user.uid]]">
+              <iron-icon icon="create"></iron-icon>
+              <span>Register</span>
+            </a>
+            <a date-route="profile" href="/profile" hidden$="[[!user.uid]]">
+              <iron-icon icon="create"></iron-icon>
+              <span>Profile</span>
+            </a>
+            <a date-route="create" href="/create" hidden$="[[!user.uid]]">
+              <iron-icon icon="add"></iron-icon>
+              <span>Create Event</span>
+            </a>
+            <a date-route="list" href="/list">
+              <iron-icon icon="list"></iron-icon>
+              <span>List Events</span>
+            </a>
+            <a hidden$="[[!user.uid]]" href="#" on-tap="logout">
+              <iron-icon icon="close"></iron-icon>
+              <span>Logout</span>
+            </a>
+          </paper-menu>
         </div>
         <app-header-layout main>
           <app-header>
@@ -65,7 +118,7 @@
               <div data-route="login">Page One
                 <button on-tap="login">login</button>
               </div>
-              <event-register data-route="register" on-kick="onKick"></event-register>
+              <event-register data-route="register" callback="[[registerCallback]]"></event-register>
               <event-create data-route="create" on-add-event="onAddEvent"></event-create>
               <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
@@ -80,6 +133,8 @@
       document.addEventListener('WebComponentsReady', function() {
         var template = document.getElementById('my-template');
         var fbLogin = template.$.firebaseLogin; // document.getElementById('firebaseLogin');
+        var profileData = template.$.profileData;
+
         template.params = {email: 'mark@oosterveld.org', password: 'password'};
 
         console.log(template.$.firebaseLogin);
@@ -101,23 +156,42 @@
           console.log('onSuccess', e);
         };
 
-        template.onKick = function(e, data) {
-          console.log('on kick', data);
+        template.registerCallback = function(data, callback) {
+          console.log('register callback');
 
-          function userCreated() {
-            console.log('user created', arguments);
-            data.callback();
+          function userCreated(event) {
+            console.log('user created', event.detail);
 
-            fbLogin.removeEventListener('user-created', userCreated);
+            function loginSuccess(event) {
+              console.log('loginSuccess', event.detail);
+
+              // setTimeout(function() {
+                template.profile = {name: data.name};
+              // }, 2000);
+
+              callback();
+            }
+
+            fbLogin.addEventListener('login', loginSuccess);
+
+            fbLogin.login({email: data.email, password: data.password});
+
+//            fbLogin.removeEventListener('user-created', userCreated);
           }
+
+          function createUserError(event) {
+            console.log('create user error', event.details, arguments);
+            callback(event.details);
+          }
+
           fbLogin.addEventListener('user-created', userCreated);
+          fbLogin.addEventListener('error', createUserError);
 
-          template.onError = function(event, error) {
-            console.log('create user error', error);
-            data.callback(error);
-          }
+          // template.onError = function(event, error) {
+          //   console.log('create user error', error);
+          //   callback(error);
+          // }
           fbLogin.createUser(data.email, data.password);
-//          data.callback('processing');
         }
 
         template.onAddEvent = function(e, data) {
@@ -128,32 +202,39 @@
 
         console.log('ready', template.statusKnown);
 
+        // template.onIronActivate = function() {console.log('onIronActivate', arguments);}
+        // template.onIronItemsChanged = function() {console.log('onIronItemsChanged', arguments);}
+        // template.onIronSelect = function() {console.log('onIronSelect', arguments);}
+        // template.onChange = function(event, obj) {console.log('onChange', obj);}
 
-
-
+        page.base('/');
+        page('*', function(context, next) {
+          template.$.myLayout.opened = false;
+          next();
+        });
         page('/welcome', function() {
           template.route = 'welcome';
-          template.$.myLayout.opened = false;
+          template.profile = {what: 'happened'};
         });
         page('/login', function() {
           template.route = 'login';
-          template.$.myLayout.opened = false;
         });
         page('/register', function() {
+
           template.route = 'register';
-          template.$.myLayout.opened = false;
         });
         page('/create', function() {
           template.route = 'create';
-          template.$.myLayout.opened = false;
         });
         page('/list', function() {
           template.route = 'list';
-          template.$.myLayout.opened = false;
         });
 
-        page('*', function() {
-          console.log('fallthrough', arguments)
+        page('*', function(context, next) {
+          template.route = context.path;
+          template.$.myLayout.opened = false;
+          console.log('base', page.base());
+          console.log('fallthrough', window.location.href, context);
         })
         page({
           click: true,

@@ -1,0 +1,71 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/firebase-element/firebase-document.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+
+<dom-module id="profile-data">
+  <template>
+    <firebase-document
+      data="{{firebaseProfile}}"
+      location="[[userLocation]]"
+      log
+      on-firebase-value="_firebaseLoaded"></firebase-document>
+    <iron-localstorage name="meetme-profile"
+      on-iron-localstorage-load="_localstorageLoaded"
+      value="{{localProfile}}"></iron-localstorage>  </template>
+  <script>
+    Polymer({
+      is: 'profile-data',
+
+      properties: {
+        location: String,
+        profile: {
+          notify: true,
+          observer: '_profileChanged'
+        },
+        user: {
+          observer: '_userChanged'
+        },
+
+        _firebaseConnected: {
+          value: false
+        }
+      },
+
+      _firebaseLoaded: function() {
+        console.log('profle-data._firebaseLoaded', this.firebaseProfile, this.profile);
+        this._firebaseConnected = true;
+
+        // On user creation, firebaseProfile will be null, but profile will have
+        // the name that was entered in the registration form. Otherwise, firebaseProfile
+        // is always right.
+        // NOTE: Wierd side effect, if you delete the entry at the server, while the user
+        // is still logged in here, the data will be readded!
+        if (this.firebaseProfile === null && this.profile !== null) {
+          this.firebaseProfile = this.profile;
+        } else {
+          this.profile = this.firebaseProfile;
+        }
+        this.localProfile = this.firebaseProfile;
+
+        this.linkPaths('firebaseProfile', 'profile');
+        this.linkPaths('localProfile', 'profile');
+      },
+      _localstroageLoaded: function() {
+        console.log('profile-data._localstroageLoaded', this.localProfile, this.profile)
+        if (!this._firebaseConnected) {
+          this.profile = this.localProfile;
+        }
+      },
+
+      _userChanged: function(user) {
+        console.log('profile-data._userChanged', user)
+        if (user) {
+          this.userLocation = ['https://m13d-meetme.firebaseio.com', 'users', this.user.uid].join('/');
+        }
+      },
+      _profileChanged: function(profile, old) {
+        console.log('==================================== _profileChanged', profile, old);
+      }
+    });
+  </script>
+</dom-module>
