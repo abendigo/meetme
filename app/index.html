@@ -74,27 +74,27 @@
       <app-drawer-layout id="myLayout" drawer-width="288px" responsive-width="900px">
         <div id="menuDrawer" drawer>
           <paper-menu attr-for-selected="data-route" selected="[[route]]">
-            <a date-route="welcome" href="/welcome">
+            <a data-route="welcome" href="/welcome">
               <iron-icon icon="home"></iron-icon>
               <span>Welcome</span>
             </a>
-            <a date-route="login" href="/login" hidden$="[[user.uid]]">
+            <a data-route="login" href="/login" hidden$="[[user.uid]]">
               <iron-icon icon="face"></iron-icon>
               <span>Login</span>
             </a>
-            <a date-route="register" href="/register" hidden$="[[user.uid]]">
+            <a data-route="register" href="/register" hidden$="[[user.uid]]">
               <iron-icon icon="create"></iron-icon>
               <span>Register</span>
             </a>
-            <a date-route="profile" href="/profile" hidden$="[[!user.uid]]">
+            <a data-route="profile" href="/profile" hidden$="[[!user.uid]]">
               <iron-icon icon="create"></iron-icon>
               <span>Profile</span>
             </a>
-            <a date-route="create" href="/create" hidden$="[[!user.uid]]">
+            <a data-route="create" href="/create" hidden$="[[!user.uid]]">
               <iron-icon icon="add"></iron-icon>
               <span>Create Event</span>
             </a>
-            <a date-route="list" href="/list">
+            <a data-route="list" href="/list">
               <iron-icon icon="list"></iron-icon>
               <span>List Events</span>
             </a>
@@ -106,48 +106,67 @@
         </div>
         <app-header-layout main>
           <app-header>
-          User: {{user}}
-            <app-toolbar>
+            <h1>Meet Me</h1>
+            <!--app-toolbar-->
               <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            </app-toolbar>
+            <!--/app-toolbar-->
           </app-header>
-            <iron-pages attr-for-selected="data-route" selected="[[route]]">
+            <iron-pages id="pages" attr-for-selected="data-route" selected="[[route]]">
               <div data-route="welcome">
-                <h1>Welcome!</h1>
+                <div hidden$="[[user.uid]]">
+                  <span>Non logged in users see this</span>
+                </div>
+                <div hidden$="[[!user.uid]]">
+                  <span>Logged in users see this!</span>
+                </div>
               </div>
-              <div data-route="login">Page One
+              <div data-route="login">
                 <button on-tap="login">login</button>
               </div>
+              <div data-route="profile" style="max-width: 400px;">
+                <form is="iron-form">
+                  <paper-input label="Name" value="[[profile.name]]"></paper-input>
+                  <paper-input label="Email Address" value="[[user.password.email]]"></paper-input>
+                  <paper-input label="Organization" value="[[profile.organization]]"></paper-input>
+                  <paper-button raised>Undo Changes</paper-button>
+                  <paper-button raised>Save Changes</paper-button>
+                </form>
+              </div>
               <event-register data-route="register" callback="[[registerCallback]]"></event-register>
-              <event-create data-route="create" on-add-event="onAddEvent"></event-create>
+              <event-create data-route="create" profile="[[profile]]" on-add-event="onAddEvent" style="max-width: 400px;"></event-create>
               <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
         </app-header-layout>
       </app-drawer-layout>
     </template>
     <script>
-      // document.addEventListener('click', function(e) {
-      //   var pages = document.querySelector('iron-pages');
-      //   pages.selectNext();
-      // });
       document.addEventListener('WebComponentsReady', function() {
         var template = document.getElementById('my-template');
         var fbLogin = template.$.firebaseLogin; // document.getElementById('firebaseLogin');
         var profileData = template.$.profileData;
 
-        template.params = {email: 'mark@oosterveld.org', password: 'password'};
+        template.params = {email: 'user@example.com', password: 'abcd123$'};
 
         console.log(template.$.firebaseLogin);
         console.log(fbLogin)
 
 //        template.user = "marko";
         template.login = function() {
-          console.log('login', this);
-          fbLogin.login({email: 'mark@oosterveld.org', password: 'password'});
+
+          function loginSuccess(event) {
+            console.log('on login', event.detail);
+            template.route = 'welcome';
+
+            fbLogin.removeEventListener('login', loginSuccess);
+          }
+          fbLogin.addEventListener('login', loginSuccess);
+
+          fbLogin.login({email: 'user@example.com', password: 'abcd123$'});
         };
         template.logout = function() {
           console.log('logout', this);
           fbLogin.logout();
+          template.route = 'list';
         };
         template.onError = function(e) {
           console.log('onError', e);
@@ -165,9 +184,8 @@
             function loginSuccess(event) {
               console.log('loginSuccess', event.detail);
 
-              // setTimeout(function() {
-                template.profile = {name: data.name};
-              // }, 2000);
+              template.profile = {name: data.name};
+              fbLogin.removeEventListener('login', loginSuccess);
 
               callback();
             }
@@ -202,40 +220,21 @@
 
         console.log('ready', template.statusKnown);
 
-        // template.onIronActivate = function() {console.log('onIronActivate', arguments);}
-        // template.onIronItemsChanged = function() {console.log('onIronItemsChanged', arguments);}
-        // template.onIronSelect = function() {console.log('onIronSelect', arguments);}
-        // template.onChange = function(event, obj) {console.log('onChange', obj);}
+        // Loop over the children of iron-pages, and build a list of routes!
+        var routes = template.$.pages.items.map(function(next) {
+          return next.dataset.route;
+        });
 
         page.base('/');
         page('*', function(context, next) {
-          template.$.myLayout.opened = false;
-          next();
+          var path = context.path;
+          if (routes.indexOf(path) === -1) {
+            page.show('/welcome');
+          } else {
+            template.$.myLayout.opened = false;
+            template.route = path;
+          }
         });
-        page('/welcome', function() {
-          template.route = 'welcome';
-          template.profile = {what: 'happened'};
-        });
-        page('/login', function() {
-          template.route = 'login';
-        });
-        page('/register', function() {
-
-          template.route = 'register';
-        });
-        page('/create', function() {
-          template.route = 'create';
-        });
-        page('/list', function() {
-          template.route = 'list';
-        });
-
-        page('*', function(context, next) {
-          template.route = context.path;
-          template.$.myLayout.opened = false;
-          console.log('base', page.base());
-          console.log('fallthrough', window.location.href, context);
-        })
         page({
           click: true,
           hashbang: true});

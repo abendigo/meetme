@@ -36,7 +36,8 @@
       </paper-input-container>
       <paper-input
         label="Host (indivdual or organization) (optional)"
-        name="host"></paper-input>
+        name="host"
+        value="[[profile.name]]"></paper-input>
       <paper-input-container always-float-label>
         <label>Start Date and Time (required)</label>
         <input
@@ -66,6 +67,10 @@
   <script>
     Polymer({
       is: 'event-create',
+
+      properties: {
+        profile: Object
+      },
 
       ready: function() {
         var form = this.$.createEvent;
