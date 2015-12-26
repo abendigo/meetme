@@ -60,7 +60,7 @@
   </head>
   <body>
     <template is="dom-bind" id="my-template">
-      <firebase-auth id="firebaseLogin"
+      <firebase-auth id="firebaseAuth"
         user="{{user}}"
         status-known="{{statusKnown}}"
         location="https://m13d-meetme.firebaseio.com"
@@ -121,7 +121,20 @@
                 </div>
               </div>
               <div data-route="login">
-                <button on-tap="login">login</button>
+                <form is="iron-form">
+                  <paper-input
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    required
+                    type="email"></paper-input>
+                  <paper-input
+                    id="password"
+                    label="Password"
+                    required
+                    type="password"></paper-input>
+                  <paper-button raised on-tap="login">login</paper-button>
+                </form>
               </div>
               <div data-route="profile" style="max-width: 400px;">
                 <form is="iron-form">
@@ -140,76 +153,127 @@
       </app-drawer-layout>
     </template>
     <script>
+
       document.addEventListener('WebComponentsReady', function() {
         var template = document.getElementById('my-template');
-        var fbLogin = template.$.firebaseLogin; // document.getElementById('firebaseLogin');
-        var profileData = template.$.profileData;
+        var firebaseAuth = template.$.firebaseAuth;
 
-        template.params = {email: 'user@example.com', password: 'abcd123$'};
-
-        console.log(template.$.firebaseLogin);
-        console.log(fbLogin)
-
-//        template.user = "marko";
-        template.login = function() {
-
-          function loginSuccess(event) {
-            console.log('on login', event.detail);
-            template.route = 'welcome';
-
-            fbLogin.removeEventListener('login', loginSuccess);
-          }
-          fbLogin.addEventListener('login', loginSuccess);
-
-          fbLogin.login({email: 'user@example.com', password: 'abcd123$'});
-        };
-        template.logout = function() {
-          console.log('logout', this);
-          fbLogin.logout();
-          template.route = 'list';
-        };
-        template.onError = function(e) {
-          console.log('onError', e);
-        };
-        template.onSuccess = function(e) {
-          console.log('onSuccess', e);
-        };
-
-        template.registerCallback = function(data, callback) {
-          console.log('register callback');
-
-          function userCreated(event) {
-            console.log('user created', event.detail);
-
+        // Helper methods, to wrap firebaseAuth with promises
+        function firebaseLogin(data) {
+          console.log('firebaseLogin', data);
+          return new Promise(function(resolve, reject) {
             function loginSuccess(event) {
-              console.log('loginSuccess', event.detail);
+              console.log('loginSuccess', arguments);
 
               template.profile = {name: data.name};
-              fbLogin.removeEventListener('login', loginSuccess);
 
-              callback();
+              firebaseAuth.removeEventListener('login', loginSuccess);
+              firebaseAuth.removeEventListener('error', loginError);
+
+              resolve(event.detail);
             }
 
-            fbLogin.addEventListener('login', loginSuccess);
+            function loginError(event) {
+              console.log('loginError', arguments);
 
-            fbLogin.login({email: data.email, password: data.password});
+              firebaseAuth.removeEventListener('login', loginSuccess);
+              firebaseAuth.removeEventListener('error', loginError);
 
-//            fbLogin.removeEventListener('user-created', userCreated);
-          }
+              reject(event.detail);
+            }
 
-          function createUserError(event) {
-            console.log('create user error', event.details, arguments);
-            callback(event.details);
-          }
+            firebaseAuth.addEventListener('login', loginSuccess);
+            firebaseAuth.addEventListener('error', loginError);
+            firebaseAuth.login({email: data.email, password: data.password});
+          });
+        }
 
-          fbLogin.addEventListener('user-created', userCreated);
-          fbLogin.addEventListener('error', createUserError);
+        function firebaseLogout() {
+          console.log('firebaseLogout');
+          return new Promise(function(resolve, reject) {
+            function logoutSuccess(event) {
+              console.log('logoutSuccess');
 
-          // template.onError = function(event, error) {
-          //   console.log('create user error', error);
-          //   callback(error);
-          // }
-          fbLogin.createUser(data.email, data.password);
+              firebaseAuth.removeEventListener('logout', logoutSuccess);
+              firebaseAuth.removeEventListener('error', logoutError);
+
+              resolve();
+            }
+
+            function logoutError(event) {
+              console.log('logoutError');
+
+              firebaseAuth.removeEventListener('logout', logoutSuccess);
+              firebaseAuth.removeEventListener('error', logoutError);
+
+              reject(e.detail);
+            }
+
+            firebaseAuth.addEventListener('logout', logoutSuccess);
+            firebaseAuth.addEventListener('error', logoutError);
+            firebaseAuth.logout();
+          });
+        }
+
+        function firebaseCreateUser(data) {
+          console.log('firebaseCreateUser', data);
+          return new Promise(function(resolve, reject) {
+            function createUserSuccess(event) {
+              console.log('createUserSuccess', arguments);
+
+              firebaseAuth.removeEventListener('user-created', createUserSuccess);
+              firebaseAuth.removeEventListener('error', createUserError);
+
+              resolve(data);
+            }
+
+            function createUserError(event) {
+              console.log('createUserError', arguments);
+
+              firebaseAuth.removeEventListener('user-created', createUserSuccess);
+              firebaseAuth.removeEventListener('error', createUserError);
+
+              reject(event.detail);
+            }
+
+            firebaseAuth.addEventListener('user-created', createUserSuccess);
+            firebaseAuth.addEventListener('error', createUserError);
+
+            firebaseAuth.createUser(data.email, data.password);
+          });
+        }
+
+        // Methods referred to in the HTML above
+        template.login = function() {
+          firebaseLogin({email: 'user@example.com', password: 'abcd123$'})
+            .then(function() {
+              page.show('/welcome');
+            })
+            .catch(function(error) {
+              console.log('oops', error);
+            });
+        };
+        template.logout = function(event) {
+          event.preventDefault();
+
+          firebaseLogout()
+            .then(function() {
+              page.show('/list');
+            })
+            .catch(function(error) {
+              console.log('oops', error);
+            });
+        };
+
+        template.registerCallback = function(data) {
+          console.log('register callback', data);
+
+          return Promise.resolve(data)
+            .then(firebaseCreateUser)
+            .then(firebaseLogin)
+            .then(function() {
+              page.show('/welcome');
+            });
         }
 
         template.onAddEvent = function(e, data) {
@@ -217,8 +281,6 @@
           this.push('events', data.form);
           data.callback();
         }
-
-        console.log('ready', template.statusKnown);
 
         // Loop over the children of iron-pages, and build a list of routes!
         var routes = template.$.pages.items.map(function(next) {

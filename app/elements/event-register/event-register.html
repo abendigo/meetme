@@ -177,16 +177,14 @@
           name: this.$.name.value,
           email: this.$.email.value,
           password: this.$.password.value
-        }, function(error) {
+        }).then(function() {
+          that.$.name.value = "";
+          that.$.email.value = "";
+          that.$.password.value = "";
+          that.$.verify.value = "";
+        }).catch(function(error) {
           console.log('callback', error);
-          if (error) {
-            that.errorMessage = error.message;
-          } else {
-            that.$.name.value = "";
-            that.$.email.value = "";
-            that.$.password.value="";
-            that.$.verify.value = "";
-          }
+          that.errorMessage = error.message;
         });
         // this.fire('kick', {
         //   name: this.$.name.value,
