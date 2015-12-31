@@ -1,6 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="../../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 
 <dom-module id="event-list">
@@ -19,16 +18,16 @@
         min-width: 400px;
       }
     </style>
-      <iron-list items="[[events]]" as="item" indexAs="__firebaseKey__" class="cards">
-      <template>
-        <paper-card heading="[[item.name]]">
+    <div class="cards">
+      <template is="dom-repeat" items=[[events]]>
+        <paper-card heading=[[item.name]]>
           [[item.type]]
           <template is="dom-repeat" items=[[item.guests]]>
             <div><span>[[item.name]]</span><span>[[item.email]]</span></div>
           </template>
         </paper-card>
-        </template>
-      </iron-list>
+      </template>
+    </div>
   </template>
   <script>
     Polymer({
