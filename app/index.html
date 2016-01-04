@@ -74,10 +74,6 @@
       <app-drawer-layout id="myLayout" drawer-width="288px" responsive-width="900px">
         <div id="menuDrawer" drawer>
           <paper-menu attr-for-selected="data-route" selected="[[route]]">
-            <a data-route="welcome" href="/welcome">
-              <iron-icon icon="home"></iron-icon>
-              <span>Welcome</span>
-            </a>
             <a data-route="login" href="/login" hidden$="[[user.uid]]">
               <iron-icon icon="face"></iron-icon>
               <span>Login</span>
@@ -112,15 +108,7 @@
             <!--/app-toolbar-->
           </app-header>
             <iron-pages id="pages" attr-for-selected="data-route" selected="[[route]]">
-              <div data-route="welcome">
-                <div hidden$="[[user.uid]]">
-                  <span>Non logged in users see this</span>
-                </div>
-                <div hidden$="[[!user.uid]]">
-                  <span>Logged in users see this!</span>
-                </div>
-              </div>
-              <div data-route="login">
+              <div data-route="login" style="max-width: 400px;">
                 <form is="iron-form">
                   <paper-input
                     id="email"
@@ -145,7 +133,7 @@
                   <paper-button raised>Save Changes</paper-button>
                 </form>
               </div>
-              <event-register data-route="register" callback="[[registerCallback]]"></event-register>
+              <event-register data-route="register" callback="[[registerCallback]]"  style="max-width: 400px;"></event-register>
               <event-create data-route="create" profile="[[profile]]" on-add-event="onAddEvent" style="max-width: 400px;"></event-create>
               <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
@@ -247,7 +235,7 @@
         template.login = function() {
           firebaseLogin({email: 'user@example.com', password: 'abcd123$'})
             .then(function() {
-              page.show('/welcome');
+              page.show('/list');
             })
             .catch(function(error) {
               console.log('oops', error);
@@ -272,7 +260,7 @@
             .then(firebaseCreateUser)
             .then(firebaseLogin)
             .then(function() {
-              page.show('/welcome');
+              page.show('/list');
             });
         }
 
@@ -291,7 +279,7 @@
         page('*', function(context, next) {
           var path = context.path;
           if (routes.indexOf(path) === -1) {
-            page.show('/welcome');
+            page.show('/list');
           } else {
             template.$.myLayout.opened = false;
             template.route = path;
