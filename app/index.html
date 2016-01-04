@@ -109,18 +109,22 @@
           </app-header>
             <iron-pages id="pages" attr-for-selected="data-route" selected="[[route]]">
               <div data-route="login" style="max-width: 400px;">
-                <form is="iron-form">
-                  <paper-input
+                <form id="loginForm" is="iron-form">
+                  <gold-email-input
+                    autocomplete="email"
+                    error-message="Please enter a valid email address."
                     id="email"
                     label="Email Address"
                     name="email"
-                    required
-                    type="email"></paper-input>
+                    type="email"
+                    required></gold-email-input>
                   <paper-input
                     id="password"
                     label="Password"
+                    name="password"
                     required
                     type="password"></paper-input>
+                  <div id="loginErrorMessage">[[loginErrorMessage]]</div>
                   <paper-button raised on-tap="login">login</paper-button>
                 </form>
               </div>
@@ -133,7 +137,7 @@
                   <paper-button raised>Save Changes</paper-button>
                 </form>
               </div>
-              <event-register data-route="register" callback="[[registerCallback]]"  style="max-width: 400px;"></event-register>
+              <event-register data-route="register" callback="[[registerCallback]]" style="max-width: 400px;"></event-register>
               <event-create data-route="create" profile="[[profile]]" on-add-event="onAddEvent" style="max-width: 400px;"></event-create>
               <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
@@ -231,15 +235,26 @@
           });
         }
 
-        // Methods referred to in the HTML above
-        template.login = function() {
-          firebaseLogin({email: 'user@example.com', password: 'abcd123$'})
+        template.$.loginForm.addEventListener('iron-form-presubmit', function(event) {
+          console.log('presubmit', event.target.serialize());
+          event.preventDefault();
+          template.loginErrorMessage = "processing...";
+          firebaseLogin(event.target.serialize())
             .then(function() {
+              template.$.loginForm.email.value = "";
+              template.$.loginForm.password.value = "";
               page.show('/list');
             })
             .catch(function(error) {
-              console.log('oops', error);
+              console.log('error', error);
+              template.loginErrorMessage = error.message;
             });
+        });
+
+        // Methods referred to in the HTML above
+        template.login = function(event, data) {
+          console.log('login', event, data);
+          template.$.loginForm.submit();
         };
         template.logout = function(event) {
           event.preventDefault();

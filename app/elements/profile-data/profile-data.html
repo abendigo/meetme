@@ -36,14 +36,15 @@
         this._firebaseConnected = true;
 
         // On user creation, firebaseProfile will be null, but profile will have
-        // the name that was entered in the registration form. Otherwise, firebaseProfile
-        // is always right.
+        // the name that was entered in the registration form. 
+        // On first login for this device, this.profile will be undefined.
         // NOTE: Wierd side effect, if you delete the entry at the server, while the user
         // is still logged in here, the data will be readded!
-        if (this.firebaseProfile === null && this.profile !== null) {
-          this.firebaseProfile = this.profile;
-        } else {
+
+        if (this.firebaseProfile) {  // truthy: !== null && !== undefined
           this.profile = this.firebaseProfile;
+        } else if (this.profile) {
+          this.firebaseProfile = this.profile;
         }
         this.localProfile = this.firebaseProfile;
 
