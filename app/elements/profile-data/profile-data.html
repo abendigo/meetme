@@ -51,7 +51,7 @@
         this.linkPaths('firebaseProfile', 'profile');
         this.linkPaths('localProfile', 'profile');
       },
-      _localstroageLoaded: function() {
+      _localstorageLoaded: function() {
         console.log('profile-data._localstroageLoaded', this.localProfile, this.profile)
         if (!this._firebaseConnected) {
           this.profile = this.localProfile;

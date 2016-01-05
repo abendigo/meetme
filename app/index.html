@@ -157,8 +157,6 @@
             function loginSuccess(event) {
               console.log('loginSuccess', arguments);
 
-              template.profile = {name: data.name};
-
               firebaseAuth.removeEventListener('login', loginSuccess);
               firebaseAuth.removeEventListener('error', loginError);
 
@@ -275,6 +273,8 @@
             .then(firebaseCreateUser)
             .then(firebaseLogin)
             .then(function() {
+              // save initial profile data
+              template.profile = {name: data.name};
               page.show('/list');
             });
         }
