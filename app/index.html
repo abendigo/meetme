@@ -116,12 +116,16 @@
                     id="email"
                     label="Email Address"
                     name="email"
+                    on-blur="_validate"
+                    regex="^\w+@\w+(\.\w+)+$"
                     type="email"
                     required></gold-email-input>
                   <paper-input
+                    error-message="Please enter your password."
                     id="password"
                     label="Password"
                     name="password"
+                    on-blur="_validate"
                     required
                     type="password"></paper-input>
                   <div id="loginErrorMessage">[[loginErrorMessage]]</div>
@@ -248,6 +252,13 @@
               template.loginErrorMessage = error.message;
             });
         });
+
+        template._validate = function(event) {
+          event.target.validate();
+        };
+        template._keyPressed = function(event) {
+          console.log('keypress', event);
+        };
 
         // Methods referred to in the HTML above
         template.login = function(event, data) {

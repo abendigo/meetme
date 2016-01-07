@@ -10,9 +10,14 @@
   <template>
     <style>
     </style>
-    <paper-progress id="progress" value="0" secondary-progress="1" max="4"></paper-progress>
+    <paper-progress
+      id="progress"
+      max="4"
+      secondary-progress="1"
+      style="width: 400px;"
+      value="0"></paper-progress>
     <p>In order to register, I need to ask you 4 questions:</p>
-    <form id="form" is="iron-form">
+    <form id="form" is="iron-form" style="width: 400px;">
       <paper-input
         autocomplete="name"
         autofocus="true"
@@ -30,6 +35,7 @@
         label="Next, I need your email address."
         name="email"
         on-change="_onChangeEmail"
+        regex="^\w+@\w+(\.\w+)+$"
         style="visibility: hidden;"
         type="email"
         required></gold-email-input>
