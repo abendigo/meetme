@@ -9,6 +9,9 @@
 <dom-module id="event-register">
   <template>
     <style>
+      div#errormessage {
+        color: red;
+      }
     </style>
     <paper-progress
       id="progress"
@@ -62,13 +65,10 @@
         required></paper-input>
       <div id="buttons" style="visibility: hidden;">
         <p>
-        Fantastic, thats all I need. If you like, you can fill in some optional
-        biographical information, or you can finalize registration now, and fill
-        that other stuff in later (or never).
+        Fantastic, thats all the required information.
         </p>
         <div id="errormessage">[[errorMessage]]</div>
-        <paper-button raised>Profile</paper-button>
-        <paper-button raised on-click="onSubmit" id="register">Register</paper-button>
+        <paper-button raised on-click="onSubmit" id="register">Continue</paper-button>
       </div>
     </form>
   </template>
@@ -79,6 +79,15 @@
       properties: {
         callback: Function
       },
+
+      // ready: function() {
+      //   this.$.email.style.visibility = "visible";
+      //   this.$.password.style.visibility = "visible";
+      //   this.$.please.style.visibility = "visible";
+      //   this.$.verify.style.visibility = "visible";
+      //   this.$.buttons.style.visibility = "visible";
+      //   this.errorMessage = "Error Message"
+      // },
 
       _valid: {
         name: false,
@@ -104,14 +113,6 @@
           this.$.email.focus();
         }
         this.updateProgressBar();
-
-      // this.$.email.style.visibility = "visible";
-      // this.$.password.style.visibility = "visible";
-      // this.$.please.style.visibility = "visible";
-      // this.$.verify.style.visibility = "visible";
-      // this.$.buttons.style.visibility = "visible";
-      // this.errorMessage = "Error Message"
-
       },
       _onChangeEmail: function() {
         this._valid.email = this.$.email.validate();
