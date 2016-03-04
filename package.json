@@ -1,11 +1,7 @@
 {
   "name": "meetme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "UDACITY - Building High Conversion Web Forms - Final Project",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\""
   },
@@ -13,21 +9,16 @@
     "type": "git",
     "url": "git+https://github.com/abendigo/meetme.git"
   },
-  "author": "",
+  "author": "Mark Oosterveld <mark@oosterveld.org>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/abendigo/meetme/issues"
   },
   "homepage": "https://github.com/abendigo/meetme#readme",
   "devDependencies": {
-    "babel-preset-es2015": "^6.3.13",
     "gulp": "^3.9.0",
-    "gulp-babel": "^6.1.1",
-    "gulp-crisper": "^1.0.0",
     "gulp-gh-pages": "^0.5.4",
-    "gulp-if": "^2.0.0",
     "gulp-size": "^2.0.0",
-    "gulp-sourcemaps": "^1.6.0",
     "gulp-vulcanize": "^6.1.0"
   }
 }
