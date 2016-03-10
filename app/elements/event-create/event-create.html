@@ -24,7 +24,7 @@
         name="name"
         required></paper-input>
       <paper-input-container>
-        <label>Type of the event (optional)</label>
+        <label for="type">Type of the event</label>
         <input
           is="iron-input"
           list="list"
@@ -36,11 +36,12 @@
         </datalist>
       </paper-input-container>
       <paper-input
-        label="Host (indivdual or organization) (optional)"
+        label="Host (indivdual or organization) (required)"
         name="host"
+        required
         value="[[profile.name]]"></paper-input>
       <paper-input-container always-float-label>
-        <label>Start Date and Time (required)</label>
+        <label for="start">Start Date and Time (required)</label>
         <input
           error-message="What time should your guests showup?"
           is="iron-input"
@@ -49,18 +50,18 @@
           type="datetime-local"></input>
       </paper-input-container>
       <paper-input-container always-float-label>
-        <label>End Date and Time (optional)</label>
+        <label for="name">End Date and Time</label>
         <input
           is="iron-input"
           name="end"
           type="datetime-local"></input>
       </paper-input-container>
       <input-location
-        label="Location (optional)"
+        label="Location"
         name="location"></input-location>
       <input-guest-list name="guests" required></input-guest-list>
       <paper-textarea
-        label="Message (optional)"
+        label="Message"
         name="message"></paper-textarea>
       <paper-button on-click="onSubmit" raised>Create Event</paper-button>
     </form>
