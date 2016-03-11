@@ -34,6 +34,10 @@
     <link rel="import" href="bower_components/paper-item/paper-item.html">
 
     <style is="custom-style">
+      h1 {
+        text-align: center;
+      }
+
       paper-menu iron-icon {
         margin-right: 33px;
         opacity: 0.54;
@@ -63,6 +67,7 @@
       }
 
       #loginErrorMessage {
+        height: 30px;
         color: red;
       }
     </style>
@@ -117,7 +122,7 @@
             </app-toolbar>
           </app-header>
             <iron-pages id="pages" attr-for-selected="data-route" selected="[[route]]">
-              <div data-route="login" style="max-width: 400px;">
+              <div data-route="login" style="max-width: 400px; margin: auto;">
                 <form id="loginForm" is="iron-form">
                   <gold-email-input
                     autocomplete="email"
@@ -134,14 +139,13 @@
                     id="password"
                     label="Password"
                     name="password"
-                    on-blur="_validate"
                     required
                     type="password"></paper-input>
                   <div id="loginErrorMessage">[[loginErrorMessage]]</div>
                   <paper-button raised on-tap="login">login</paper-button>
                 </form>
               </div>
-              <div data-route="profile" style="max-width: 400px;">
+              <div data-route="profile" style="max-width: 400px; margin: auto;">
                 <p>
                   Opional Profile Information
                 </p>
@@ -153,8 +157,8 @@
                   <paper-button raised on-tap="saveProfile">Save Changes</paper-button>
                 </form>
               </div>
-              <event-register data-route="register" callback="[[registerCallback]]" style="max-width: 400px;"></event-register>
-              <event-create data-route="create" profile="[[profile]]" on-add-event="onAddEvent" style="max-width: 400px;"></event-create>
+              <event-register data-route="register" callback="[[registerCallback]]" style="max-width: 400px; margin: auto;"></event-register>
+              <event-create data-route="create" profile="[[profile]]" on-add-event="onAddEvent" style="max-width: 400px; margin: auto;"></event-create>
               <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
         </app-header-layout>
@@ -198,8 +202,6 @@
           console.log('firebaseLogout');
           return new Promise(function(resolve, reject) {
             function logoutSuccess(event) {
-              console.log('logoutSuccess');
-
               firebaseAuth.removeEventListener('logout', logoutSuccess);
               firebaseAuth.removeEventListener('error', logoutError);
 
@@ -207,8 +209,6 @@
             }
 
             function logoutError(event) {
-              console.log('logoutError');
-
               firebaseAuth.removeEventListener('logout', logoutSuccess);
               firebaseAuth.removeEventListener('error', logoutError);
 
@@ -255,21 +255,18 @@
           template.loginErrorMessage = "processing...";
           firebaseLogin(event.target.serialize())
             .then(function() {
+              template.loginErrorMessage = "";
               template.$.loginForm.email.value = "";
               template.$.loginForm.password.value = "";
               page.show('/list');
             })
             .catch(function(error) {
-              console.log('error', error);
               template.loginErrorMessage = error.message;
             });
         });
 
         template._validate = function(event) {
           event.target.validate();
-        };
-        template._keyPressed = function(event) {
-          console.log('keypress', event);
         };
 
         // Methods referred to in the HTML above
