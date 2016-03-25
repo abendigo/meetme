@@ -9,18 +9,23 @@
 <dom-module id="event-register">
   <template>
     <style>
+      paper-button {
+        background-color: antiquewhite;
+      }
+
       div#errormessage {
+        height: 20px;
         color: red;
       }
     </style>
-    <paper-progress
-      id="progress"
-      max="4"
-      secondary-progress="1"
-      style="width: 400px;"
-      value="0"></paper-progress>
-    <p>In order to register, I need to ask you 4 questions:</p>
-    <form id="form" is="iron-form" style="width: 400px;">
+    <form id="form" is="iron-form" style="width: 400px; margin: auto;">
+      <paper-progress
+        id="progress"
+        max="4"
+        secondary-progress="1"
+        style="width: 100%;"
+        value="0"></paper-progress>
+      <p>In order to register, I need to ask you 4 questions:</p>
       <paper-input
         autocomplete="name"
         autofocus="true"
@@ -28,7 +33,7 @@
         id="name"
         label="First, what should I call you?"
         name="name"
-        on-change="_onChangeName"
+        on-blur="_onBlurName"
         required
         type="text"></paper-input>
       <gold-email-input
@@ -37,19 +42,17 @@
         id="email"
         label="Next, I need your email address."
         name="email"
-        on-change="_onChangeEmail"
+        on-blur="_onBlurEmail"
         regex="^\w+@\w+(\.\w+)+$"
-        style="visibility: hidden;"
         type="email"
         required></gold-email-input>
       <paper-input
         id="password"
         label="Awesome, now Choose a password."
-        on-change="_onChangePassword"
-        style="visibility: hidden;"
+        on-blur="_onBlurPassword"
         type="password"
         required></paper-input>
-      <ul id="please" style="visibility: hidden;">
+      <ul id="please">
         <li id="error-len">It must be at least 8 characters long.</li>
         <li id="error-letter">It must contain at least one letter,</li>
         <li id="error-digit">one digit,</li>
@@ -59,11 +62,10 @@
         error-message="Passwords must match."
         id="verify"
         label="And finally, verify your password!"
-        on-change="_onChangeVerify"
-        style="visibility: hidden;"
+        on-blur="_onBlurVerify"
         type="password"
         required></paper-input>
-      <div id="buttons" style="visibility: hidden;">
+      <div id="buttons">
         <p>
         Fantastic, thats all the required information.
         </p>
@@ -73,21 +75,69 @@
     </form>
   </template>
   <script>
+    function _validatePassword(form) {
+      var valid = true;
+      var password = form.$.password.value;
+
+      if (password.length < 8) {
+        form.$['error-len'].style.color = 'red';
+        valid = false;
+      } else {
+        form.$['error-len'].style.color = '';
+      }
+
+      if (!/[a-zA-Z]/g.test(password)) {
+        form.$['error-letter'].style.color = 'red';
+        valid = false;
+      } else {
+        form.$['error-letter'].style.color = '';
+      }
+
+      if (!/\d/g.test(password)) {
+        form.$['error-digit'].style.color = 'red';
+        valid = false;
+      } else {
+        form.$['error-digit'].style.color = '';
+      }
+
+      if (!/[\!\@\#\$\%\^\&\*]/g.test(password)) {
+        form.$['error-special'].style.color = 'red';
+        valid = false;
+      } else {
+        form.$['error-special'].style.color = '';
+      }
+
+      form.$.password.invalid = !valid;
+      return valid;
+    }
+
+    function _validateVerify(form) {
+      var valid = true;
+
+      if (form.$.password.value && form.$.verify.value &&
+          form.$.password.value == form.$.verify.value) {
+        form.$.verify.invalid = false;
+        this._valid.verify = true;
+        // this.$.buttons.style.visibility = "visible";
+        // this.$.register.focus();
+      } else {
+        form.$.verify.invalid = true;
+        valid = false;
+      }
+
+      return valid;
+    }
+
     Polymer({
       is: 'event-register',
+
+      listeners: {
+        'form.iron-form-presubmit': '_presubmit'
+      },
 
       properties: {
         callback: Function
       },
-
-      // ready: function() {
-      //   this.$.email.style.visibility = "visible";
-      //   this.$.password.style.visibility = "visible";
-      //   this.$.please.style.visibility = "visible";
-      //   this.$.verify.style.visibility = "visible";
-      //   this.$.buttons.style.visibility = "visible";
-      //   this.errorMessage = "Error Message"
-      // },
 
       _valid: {
         name: false,
@@ -106,77 +156,51 @@
         this.$.progress.secondaryProgress = count + 1;
       },
 
-      _onChangeName: function() {
-        this._valid.name = this.$.name.validate();
-        if (this._valid.name) {
-          this.$.email.style.visibility = "visible";
-          this.$.email.focus();
-        }
-        this.updateProgressBar();
-      },
-      _onChangeEmail: function() {
-        this._valid.email = this.$.email.validate();
-        if (this._valid.email) {
-          this.$.password.style.visibility = "visible";
-          this.$.please.style.visibility = "visible";
-          this.$.password.focus();
-        }
-        this.updateProgressBar();
-      },
-      _onChangePassword: function() {
-        var password = this.$.password.value;
-        this._valid.password = true;
-
-          if (password.length < 8) {
-            this.$['error-len'].style.color = 'red';
-            this._valid.password = false;
-          } else {
-            this.$['error-len'].style.color = 'green';
-          }
-
-          if (!/[a-zA-Z]/g.test(password)) {
-            this.$['error-letter'].style.color = 'red';
-            this._valid.password = false;
-          } else {
-            this.$['error-letter'].style.color = 'green';
-          }
-
-          if (!/\d/g.test(password)) {
-            this.$['error-digit'].style.color = 'red';
-            this._valid.password = false;
-          } else {
-            this.$['error-digit'].style.color = 'green';
-          }
-
-          if (!/[\!\@\#\$\%\^\&\*]/g.test(password)) {
-            this.$['error-special'].style.color = 'red';
-            this._valid.password = false;
-          } else {
-            this.$['error-special'].style.color = 'green';
-          }
-
-          this.$.password.invalid = !this._valid.password;
-          if (this._valid.password) {
-            this.$.verify.style.visibility = "visible";
-            this.$.verify.focus();
-          }
+      _onBlurName: function(event) {
+        if (!(event instanceof FocusEvent)) {
+          this._valid.name = this.$.name.validate();
           this.updateProgressBar();
+        }
       },
-      _onChangeVerify: function() {
-//          valid.verify = verifyElement.validate();
-          if (this.$.password.value && this.$.verify.value &&
-              this.$.password.value == this.$.verify.value) {
-            this.$.verify.invalid = false;
-            this._valid.verify = true;
-            this.$.buttons.style.visibility = "visible";
-            this.$.register.focus();
-          } else {
-            this.$.verify.invalid = true;
-            this._valid.verify = false;
-          }
+      _onBlurEmail: function(event) {
+        if (!(event instanceof FocusEvent)) {
+          this._valid.email = this.$.email.validate();
           this.updateProgressBar();
+        }
+      },
+      _onBlurPassword: function(event) {
+        if (!(event instanceof FocusEvent)) {
+          // this._valid.password = _validatePassword(this);
+          this.updateProgressBar();
+        }
+      },
+      _onBlurVerify: function(event) {
+        console.log('_onBlurVerify', event instanceof FocusEvent);
+        if (!(event instanceof FocusEvent)) {
+        //   if (this.$.password.value && this.$.verify.value &&
+        //       this.$.password.value == this.$.verify.value) {
+        //     this.$.verify.invalid = false;
+        //     this._valid.verify = true;
+        //     // this.$.buttons.style.visibility = "visible";
+        //     // this.$.register.focus();
+        //   } else {
+        //     this.$.verify.invalid = true;
+        //     this._valid.verify = false;
+        //   }
+          this.updateProgressBar();
+        }
       },
       onSubmit: function() {
+        console.log('on submit');
+        this.$.form.submit();
+      },
+      _presubmit: function(event) {
+        event.preventDefault();
+        console.log('_presubmit');
+
+        var a = _validatePassword(this);
+      },
+      fii: function() {
         console.log('on submit');
         var that = this;
         this.$.errormessage.innerHtml = "Processing...";
@@ -193,15 +217,6 @@
           console.log('callback', error);
           that.errorMessage = error.message;
         });
-        // this.fire('kick', {
-        //   name: this.$.name.value,
-        //   email: this.$.email.value,
-        //   password: this.$.password.value,
-        //   callback: function(error) {
-        //     console.log('callback', error);
-        //     that.errorMessage = error.message;
-        //   }
-        // });
       }
     });
   </script>
