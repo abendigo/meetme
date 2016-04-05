@@ -1,6 +1,6 @@
 {
   "name": "meetme",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "UDACITY - Building High Conversion Web Forms - Final Project",
   "scripts": {
     "test": "echo \"Error: no test specified\""
