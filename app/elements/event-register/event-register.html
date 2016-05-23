@@ -47,6 +47,7 @@
         type="email"
         required></gold-email-input>
       <paper-input
+        error-message="Invalid Password"
         id="password"
         label="Awesome, now Choose a password."
         on-blur="_onBlurPassword"
@@ -66,9 +67,6 @@
         type="password"
         required></paper-input>
       <div id="buttons">
-        <p>
-        Fantastic, thats all the required information.
-        </p>
         <div id="errormessage">[[errorMessage]]</div>
         <paper-button raised on-click="onSubmit" id="register">Continue</paper-button>
       </div>
@@ -76,55 +74,26 @@
   </template>
   <script>
     function _validatePassword(form) {
-      var valid = true;
       var password = form.$.password.value;
+      var checks = {};
 
-      if (password.length < 8) {
-        form.$['error-len'].style.color = 'red';
-        valid = false;
-      } else {
-        form.$['error-len'].style.color = '';
-      }
+      checks.length = password.length >= 8;
+      checks.letters = /[a-zA-Z]/g.test(password);
+      checks.digits = /\d/g.test(password);
+      checks.specials = /[\!\@\#\$\%\^\&\*]/g.test(password);
 
-      if (!/[a-zA-Z]/g.test(password)) {
-        form.$['error-letter'].style.color = 'red';
-        valid = false;
-      } else {
-        form.$['error-letter'].style.color = '';
-      }
-
-      if (!/\d/g.test(password)) {
-        form.$['error-digit'].style.color = 'red';
-        valid = false;
-      } else {
-        form.$['error-digit'].style.color = '';
-      }
-
-      if (!/[\!\@\#\$\%\^\&\*]/g.test(password)) {
-        form.$['error-special'].style.color = 'red';
-        valid = false;
-      } else {
-        form.$['error-special'].style.color = '';
-      }
-
+      var valid = checks.length && checks.letters && checks.digits && checks.specials;
       form.$.password.invalid = !valid;
       return valid;
     }
 
     function _validateVerify(form) {
-      var valid = true;
+      var password = form.$.password.value;
+      var verify = form.$.verify.value;
 
-      if (form.$.password.value && form.$.verify.value &&
-          form.$.password.value == form.$.verify.value) {
-        form.$.verify.invalid = false;
-        this._valid.verify = true;
-        // this.$.buttons.style.visibility = "visible";
-        // this.$.register.focus();
-      } else {
-        form.$.verify.invalid = true;
-        valid = false;
-      }
+      var valid = (password && verify && password === verify);
 
+      form.$.verify.invalid = !valid;
       return valid;
     }
 
@@ -170,39 +139,23 @@
       },
       _onBlurPassword: function(event) {
         if (!(event instanceof FocusEvent)) {
-          // this._valid.password = _validatePassword(this);
+          this._valid.password = _validatePassword(this);
           this.updateProgressBar();
         }
       },
       _onBlurVerify: function(event) {
-        console.log('_onBlurVerify', event instanceof FocusEvent);
         if (!(event instanceof FocusEvent)) {
-        //   if (this.$.password.value && this.$.verify.value &&
-        //       this.$.password.value == this.$.verify.value) {
-        //     this.$.verify.invalid = false;
-        //     this._valid.verify = true;
-        //     // this.$.buttons.style.visibility = "visible";
-        //     // this.$.register.focus();
-        //   } else {
-        //     this.$.verify.invalid = true;
-        //     this._valid.verify = false;
-        //   }
+          this._valid.verify = _validateVerify(this);
           this.updateProgressBar();
         }
       },
       onSubmit: function() {
-        console.log('on submit');
         this.$.form.submit();
       },
       _presubmit: function(event) {
         event.preventDefault();
-        console.log('_presubmit');
-
-        var a = _validatePassword(this);
-      },
-      fii: function() {
-        console.log('on submit');
         var that = this;
+
         this.$.errormessage.innerHtml = "Processing...";
         this.callback({
           name: this.$.name.value,
@@ -213,7 +166,7 @@
           that.$.email.value = "";
           that.$.password.value = "";
           that.$.verify.value = "";
-        }).catch(function(error) {
+        }, function(error) {
           console.log('callback', error);
           that.errorMessage = error.message;
         });
