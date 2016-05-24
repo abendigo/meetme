@@ -158,7 +158,7 @@
                 </form>
               </div>
               <event-register data-route="register" callback="[[registerCallback]]" style="max-width: 400px; margin: auto;"></event-register>
-              <event-create data-route="create" profile="[[profile]]" on-add-event="onAddEvent" style="max-width: 400px; margin: auto;"></event-create>
+              <event-create data-route="create" profile="[[profile]]" callback="[[eventCallback]]" on-add-event="onAddEvent" style="max-width: 400px; margin: auto;"></event-create>
               <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
         </app-header-layout>
@@ -301,12 +301,18 @@
               template.profile = {name: data.name};
               page.show('/profile');
             });
-        }
+        };
+
+        template.eventCallback = function(data) {
+          console.log('event callback', data);
+
+          return Promise.resolve(data)
+        };
 
         template.onAddEvent = function(e, data) {
           console.log('onAddEvent', data);
-          this.push('events', data.form);
-          data.callback();
+          // this.push('events', data.form);
+          // data.callback();
         }
 
         // Loop over the children of iron-pages, and build a list of routes!

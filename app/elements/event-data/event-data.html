@@ -24,7 +24,7 @@
         }
       },
       _firebaseLoaded: function() {
-        console.log('_firebaseLoaded', this.fbEvents);
+//        console.log('_firebaseLoaded', this.fbEvents);
         this._firebaseConnected = true;
 
         this.events = this.fbEvents;
@@ -34,7 +34,7 @@
         this.linkPaths('lsEvents', 'events');
       },
       _backupLoaded: function() {
-        console.log('_backupLoaded', this.lsEvents);
+//        console.log('_backupLoaded', this.lsEvents);
         // DO NOT overwrite if we are connected to Firebase!
         if (!this._firebaseConnected) {
           this.events = this.lsEvents.slice();

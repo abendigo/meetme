@@ -1,7 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
-<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../bower_components/gold-email-input/gold-email-input.html">
@@ -15,13 +14,13 @@
     <style>
     </style>
     <form id="createEvent" is="iron-form" style="width: 400px; margin: auto;">
-      <paper-progress id="progress" value="0" secondary-progress="1" max="8"
-        style="width: 100%;"></paper-progress>
       <paper-input
         autofocus
         error-message="The event needs a name!"
+        id="name"
         label="Name of the event (required)"
         name="name"
+        on-blur="_onBlurName"
         required></paper-input>
       <paper-input-container>
         <label for="type">Type of the event</label>
@@ -36,24 +35,32 @@
         </datalist>
       </paper-input-container>
       <paper-input
+      error-message="Every event needs a host."
+        id="host"
         label="Host (indivdual or organization) (required)"
         name="host"
+        on-blur="_onBlurHost"
         required
         value="[[profile.name]]"></paper-input>
-      <paper-input-container always-float-label>
+      <paper-input-container id="startcontainer" always-float-label attr-for-value="value">
         <label for="start">Start Date and Time (required)</label>
         <input
-          error-message="What time should your guests showup?"
+          error-message="startTimeError"
+          id="start"
           is="iron-input"
           name="start"
+          on-blur="_onBlurStart"
           required
           type="datetime-local"></input>
+        <paper-input-error>Start Time Error</paper-input-error>
       </paper-input-container>
       <paper-input-container always-float-label>
-        <label for="name">End Date and Time</label>
+        <label for="end">End Date and Time</label>
         <input
+          id="end"
           is="iron-input"
           name="end"
+          on-blur="_onBlurEnd"
           type="datetime-local"></input>
       </paper-input-container>
       <input-location
@@ -70,35 +77,89 @@
     Polymer({
       is: 'event-create',
 
-      properties: {
-        profile: Object
+      listeners: {
+        'createEvent.iron-form-presubmit': '_presubmit'
       },
 
-      ready: function() {
-        var form = this.$.createEvent;
-        form.addEventListener('iron-form-presubmit', function(event) {
-          event.preventDefault();
+      properties: {
+        callback: Function,
+        profile: Object,
+        startTimeErorr:String
+      },
 
-          var data = form.serialize();
-          Object.keys(data).forEach(function(next, index, array) {
-            console.log('next', next, data[next]);
-            if (!data[next]) {
-              delete data[next];
-            }
-          });
+      // ready: function() {
+      //   var form = this.$.createEvent;
+      //   form.addEventListener('iron-form-presubmit', function(event) {
+      //     event.preventDefault();
+      //
+      //     var data = form.serialize();
+      //     Object.keys(data).forEach(function(next, index, array) {
+      //       console.log('next', next, data[next]);
+      //       if (!data[next]) {
+      //         delete data[next];
+      //       }
+      //     });
+      //
+      //     this.fire('add-event', {
+      //       form: data,
+      //       callback: function(error) {
+      //         console.log('error!', error);
+      //       }
+      //     })
+      //   });
+      // },
+      _onBlurName: function(event) {
+        if (!(event instanceof FocusEvent)) {
+          this.$.name.validate();
+          // this._valid.name = this.$.name.validate();
+          // this.updateProgressBar();
+        }
+      },
+      _onBlurHost: function(event) {
+        if (!(event instanceof FocusEvent)) {
+          this.$.host.validate();
+        }
+      },
+      _onBlurStart: function(event) {
+        this.startTimeError = 'start time error';
+        this.$.start.invalid = true;
 
-          this.fire('add-event', {
-            form: data,
-            callback: function(error) {
-              console.log('error!', error);
-            }
-          })
-        });
+        console.log('container', this.$.startcontainer.value)
+        this.$.startcontainer.invalid = true;
+
+        var foo = this.$.start;
+        console.log('blur start', foo, foo.value)
+        if (!(event instanceof FocusEvent)) {
+          this.$.start.validate();
+        }
+      },
+      _onBlurEnd: function(event) {
       },
 
       onSubmit: function() {
         console.log('onSubmit');
         this.$.createEvent.submit();
+      },
+      _presubmit: function(event) {
+        event.preventDefault();
+
+        this.$.errormessage.innerHtml = "Processing...";
+
+        var data = form.serialize();
+        Object.keys(data).forEach(function(next, index, array) {
+          console.log('next', next, data[next]);
+          if (!data[next]) {
+            delete data[next];
+          }
+        });
+
+
+        this.callback(data)
+        .then(function() {
+
+        }, function(error) {
+
+        });
       }
     });
   </script>
