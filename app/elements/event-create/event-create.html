@@ -12,6 +12,14 @@
 <dom-module id="event-create">
   <template>
     <style>
+      paper-button {
+        background-color: antiquewhite;
+      }
+
+      div#errormessage {
+        height: 20px;
+        color: red;
+      }
     </style>
     <form id="createEvent" is="iron-form" style="width: 400px; margin: auto;">
       <paper-input
@@ -35,33 +43,33 @@
         </datalist>
       </paper-input-container>
       <paper-input
-      error-message="Every event needs a host."
+        error-message="Every event needs a host."
         id="host"
         label="Host (indivdual or organization) (required)"
         name="host"
         on-blur="_onBlurHost"
         required
         value="[[profile.name]]"></paper-input>
-      <paper-input-container id="startcontainer" always-float-label attr-for-value="value">
+      <paper-input-container id="startcontainer" always-float-label>
         <label for="start">Start Date and Time (required)</label>
         <input
-          error-message="startTimeError"
           id="start"
           is="iron-input"
           name="start"
-          on-blur="_onBlurStart"
+          on-blur="_validateStart"
           required
           type="datetime-local"></input>
-        <paper-input-error>Start Time Error</paper-input-error>
+        <paper-input-error>[[startTimeError]]</paper-input-error>
       </paper-input-container>
-      <paper-input-container always-float-label>
+      <paper-input-container id="endcontainer" always-float-label>
         <label for="end">End Date and Time</label>
         <input
           id="end"
           is="iron-input"
           name="end"
-          on-blur="_onBlurEnd"
+          on-blur="_validateEnd"
           type="datetime-local"></input>
+        <paper-input-error>[[endTimeError]]</paper-input-error>
       </paper-input-container>
       <input-location
         label="Location"
@@ -70,6 +78,7 @@
       <paper-textarea
         label="Message"
         name="message"></paper-textarea>
+      <div id="errormessage">[[errorMessage]]</div>
       <paper-button on-click="onSubmit" raised>Create Event</paper-button>
     </form>
   </template>
@@ -84,81 +93,80 @@
       properties: {
         callback: Function,
         profile: Object,
-        startTimeErorr:String
+        startTimeErorr: String,
+        endTimeError: String,
+        errorMessage: String
       },
 
-      // ready: function() {
-      //   var form = this.$.createEvent;
-      //   form.addEventListener('iron-form-presubmit', function(event) {
-      //     event.preventDefault();
-      //
-      //     var data = form.serialize();
-      //     Object.keys(data).forEach(function(next, index, array) {
-      //       console.log('next', next, data[next]);
-      //       if (!data[next]) {
-      //         delete data[next];
-      //       }
-      //     });
-      //
-      //     this.fire('add-event', {
-      //       form: data,
-      //       callback: function(error) {
-      //         console.log('error!', error);
-      //       }
-      //     })
-      //   });
-      // },
       _onBlurName: function(event) {
-        if (!(event instanceof FocusEvent)) {
-          this.$.name.validate();
-          // this._valid.name = this.$.name.validate();
-          // this.updateProgressBar();
-        }
+        this.$.name.validate();
       },
       _onBlurHost: function(event) {
-        if (!(event instanceof FocusEvent)) {
-          this.$.host.validate();
+        this.$.host.validate();
+      },
+      _validateStart: function(event) {
+        this.$.startcontainer.invalid = false;
+
+        var whenString = this.$.start.value;
+        if (whenString) {
+          var whenDate = new Date(whenString);
+
+          if (whenDate.getTime() < Date.now()) {
+            this.startTimeError = 'Event must start in the future.';
+            this.$.startcontainer.invalid = true;
+          }
+        } else {
+          this.startTimeError = 'When does the event start?';
+          this.$.startcontainer.invalid = true;
         }
       },
-      _onBlurStart: function(event) {
-        this.startTimeError = 'start time error';
-        this.$.start.invalid = true;
+      _validateEnd: function(event) {
+        this.$.endcontainer.invalid = false;
 
-        console.log('container', this.$.startcontainer.value)
-        this.$.startcontainer.invalid = true;
+        var startString = this.$.start.value;
+        var endString = this.$.end.value;
+        if (endString) {
+          var startDate = new Date(startString);
+          var endDate = new Date(endString);
 
-        var foo = this.$.start;
-        console.log('blur start', foo, foo.value)
-        if (!(event instanceof FocusEvent)) {
-          this.$.start.validate();
+          if (startDate.getTime() >= endDate.getTime()) {
+            this.endTimeError = 'Event cant finish before it starts.';
+            this.$.endcontainer.invalid = true;
+          }
         }
-      },
-      _onBlurEnd: function(event) {
       },
 
       onSubmit: function() {
-        console.log('onSubmit');
-        this.$.createEvent.submit();
+        this._validateStart();
+        this._validateEnd();
+
+        if (!this.$.startcontainer.invalid && !this.$.endcontainer.invalid) {
+          this.$.createEvent.submit();
+        }
       },
       _presubmit: function(event) {
         event.preventDefault();
 
-        this.$.errormessage.innerHtml = "Processing...";
+        this.errorMessage = "Processing...";
 
-        var data = form.serialize();
-        Object.keys(data).forEach(function(next, index, array) {
-          console.log('next', next, data[next]);
+        var data = this.$.createEvent.serialize();
+        Object.keys(data).forEach(function(next) {
           if (!data[next]) {
             delete data[next];
           }
         });
 
-
+        var that = this;
         this.callback(data)
         .then(function() {
+          that.$.errorMessage = '';
 
+          that.$.name.value = '';
+          that.$.host.value = that.profile.name;
+          that.$.start.value = '';
+          that.$.end.value = '';
         }, function(error) {
-
+          that.$.errorMessage = error;
         });
       }
     });

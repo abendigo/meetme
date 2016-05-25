@@ -172,11 +172,8 @@
 
         // Helper methods, to wrap firebaseAuth with promises
         function firebaseLogin(data) {
-          console.log('firebaseLogin', data);
           return new Promise(function(resolve, reject) {
             function loginSuccess(event) {
-              console.log('loginSuccess', arguments);
-
               firebaseAuth.removeEventListener('login', loginSuccess);
               firebaseAuth.removeEventListener('error', loginError);
 
@@ -184,8 +181,6 @@
             }
 
             function loginError(event) {
-              console.log('loginError', arguments);
-
               firebaseAuth.removeEventListener('login', loginSuccess);
               firebaseAuth.removeEventListener('error', loginError);
 
@@ -199,7 +194,6 @@
         }
 
         function firebaseLogout() {
-          console.log('firebaseLogout');
           return new Promise(function(resolve, reject) {
             function logoutSuccess(event) {
               firebaseAuth.removeEventListener('logout', logoutSuccess);
@@ -222,11 +216,8 @@
         }
 
         function firebaseCreateUser(data) {
-          console.log('firebaseCreateUser', data);
           return new Promise(function(resolve, reject) {
             function createUserSuccess(event) {
-              console.log('createUserSuccess', arguments);
-
               firebaseAuth.removeEventListener('user-created', createUserSuccess);
               firebaseAuth.removeEventListener('error', createUserError);
 
@@ -234,8 +225,6 @@
             }
 
             function createUserError(event) {
-              console.log('createUserError', arguments);
-
               firebaseAuth.removeEventListener('user-created', createUserSuccess);
               firebaseAuth.removeEventListener('error', createUserError);
 
@@ -250,7 +239,6 @@
         }
 
         template.$.loginForm.addEventListener('iron-form-presubmit', function(event) {
-          console.log('presubmit', event.target.serialize());
           event.preventDefault();
           template.loginErrorMessage = "processing...";
           firebaseLogin(event.target.serialize())
@@ -271,7 +259,6 @@
 
         // Methods referred to in the HTML above
         template.login = function(event, data) {
-          console.log('login', event, data);
           template.$.loginForm.submit();
         };
         template.logout = function(event) {
@@ -280,19 +267,14 @@
           firebaseLogout()
             .then(function() {
               page.show('/list');
-            })
-            .catch(function(error) {
-              console.log('oops', error);
             });
         };
 
         template.saveProfile = function() {
-          console.log('save profile');
+          // TODO: Save the users profile
         };
 
         template.registerCallback = function(data) {
-          console.log('register callback', data);
-
           return Promise.resolve(data)
             .then(firebaseCreateUser)
             .then(firebaseLogin)
@@ -304,16 +286,14 @@
         };
 
         template.eventCallback = function(data) {
-          console.log('event callback', data);
-
           return Promise.resolve(data)
+            .then(function(data) {
+              template.push('events', data);
+            })
+            .then(function() {
+              page.show('/list');
+            });
         };
-
-        template.onAddEvent = function(e, data) {
-          console.log('onAddEvent', data);
-          // this.push('events', data.form);
-          // data.callback();
-        }
 
         // Loop over the children of iron-pages, and build a list of routes!
         var routes = template.$.pages.items.map(function(next) {

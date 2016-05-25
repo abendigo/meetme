@@ -25,6 +25,10 @@
       <template is="dom-repeat" items=[[events]]>
         <paper-card heading=[[item.name]]>
           [[item.type]]
+          <br />
+          [[item.start]]
+          <br />
+          [[item.message]]
           <template is="dom-repeat" items=[[item.guests]]>
             <div><span>[[item.name]]</span><span>[[item.email]]</span></div>
           </template>
