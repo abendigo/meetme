@@ -147,11 +147,11 @@
               </div>
               <div data-route="profile" style="max-width: 400px; margin: auto;">
                 <p>
-                  Opional Profile Information
+                  Optional Profile Information
                 </p>
                 <form is="iron-form">
                   <paper-input label="Name" value="[[profile.name]]"></paper-input>
-                  <paper-input label="Email Address" value="[[user.password.email]]"></paper-input>
+                  <paper-input disabled label="Email Address" value="[[user.password.email]]"></paper-input>
                   <paper-input label="Organization" value="[[profile.organization]]"></paper-input>
                   <paper-input label="Title" value="[[profile.title]]"></paper-input>
                   <paper-button raised on-tap="saveProfile">Save Changes</paper-button>
