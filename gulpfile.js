@@ -1,32 +1,14 @@
 var gulp = require('gulp');
-var ghPages = require('gulp-gh-pages');
-var size = require('gulp-size');
 var vulcanize = require('gulp-vulcanize');
-
-var DIST = 'dist';
-var dist = function(subpath) {
-    return !subpath ? DIST : path.join(DIST, subpath);
-};
-
-gulp.task('deploy', function() {
-    return gulp.src('./dist/**/*')
-        .pipe(ghPages());
-});
+var crisper = require('gulp-crisper');
 
 gulp.task('vulcanize', function() {
-    return gulp.src('app/index.html')
-        .pipe(size({
-            showFiles: true,
-            title: 'src'
-        }))
-        .pipe(vulcanize({
-            stripComments: true,
-            inlineCss: true,
-            inlineScripts: true
-        }))
-        .pipe(size({
-            showFiles: true,
-            title: 'dest'
-        }))
-        .pipe(gulp.dest('dist'));
+  return gulp.src('app/index.html')
+    .pipe(vulcanize({
+      inlineScripts: true,
+    }))
+    .pipe(crisper())
+    .pipe(gulp.dest('dist'));
 });
+
+gulp.task('default', ['vulcanize']);
