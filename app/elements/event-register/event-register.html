@@ -9,6 +9,12 @@
 <dom-module id="event-register">
   <template>
     <style>
+      form {
+        width: 100%;
+        max-width: 400px;
+        margin: auto;
+      }
+
       paper-button {
         background-color: antiquewhite;
       }
@@ -18,7 +24,7 @@
         color: red;
       }
     </style>
-    <form id="form" is="iron-form" style="width: 400px; margin: auto;">
+    <form id="form" is="iron-form">
       <paper-progress
         id="progress"
         max="4"
@@ -43,7 +49,6 @@
         label="Next, I need your email address."
         name="email"
         on-blur="_onBlurEmail"
-        regex="^\w+@\w+(\.\w+)+$"
         type="email"
         required></gold-email-input>
       <paper-input
@@ -73,6 +78,14 @@
     </form>
   </template>
   <script>
+    function _validateName(form) {
+      return form.$.name.validate()
+    }
+
+    function _validateEmail(form) {
+      return form.$.email.validate();
+    }
+
     function _validatePassword(form) {
       var password = form.$.password.value;
       var checks = {};
@@ -83,6 +96,7 @@
       checks.specials = /[\!\@\#\$\%\^\&\*]/g.test(password);
 
       var valid = checks.length && checks.letters && checks.digits && checks.specials;
+
       form.$.password.invalid = !valid;
       return valid;
     }
@@ -114,6 +128,7 @@
         password: false,
         verify: false
       },
+
       updateProgressBar: function() {
         var count = 0;
         for (var key in this._valid) {
@@ -127,13 +142,13 @@
 
       _onBlurName: function(event) {
         if (!(event instanceof FocusEvent)) {
-          this._valid.name = this.$.name.validate();
+          this._valid.name = _validateName(this);
           this.updateProgressBar();
         }
       },
       _onBlurEmail: function(event) {
         if (!(event instanceof FocusEvent)) {
-          this._valid.email = this.$.email.validate();
+          this._valid.email = _validateEmail(this);
           this.updateProgressBar();
         }
       },
@@ -150,26 +165,29 @@
         }
       },
       onSubmit: function() {
-        this.$.form.submit();
+        // use bit-wise & so it validates all fields
+        if (_validateName(this) & _validateEmail(this) &
+            _validatePassword(this) & _validateVerify(this)) {
+          this.$.form.submit();
+        }
       },
       _presubmit: function(event) {
         event.preventDefault();
-        var that = this;
 
         this.$.errormessage.innerHtml = "Processing...";
+
         this.callback({
           name: this.$.name.value,
           email: this.$.email.value,
           password: this.$.password.value
         }).then(function() {
-          that.$.name.value = "";
-          that.$.email.value = "";
-          that.$.password.value = "";
-          that.$.verify.value = "";
-        }, function(error) {
-          console.log('callback', error);
-          that.errorMessage = error.message;
-        });
+          this.$.name.value = "";
+          this.$.email.value = "";
+          this.$.password.value = "";
+          this.$.verify.value = "";
+        }.bind(this), function(error) {
+          this.errorMessage = error.message;
+        }.bind(this));
       }
     });
   </script>

@@ -137,7 +137,6 @@
                     label="Email Address"
                     name="email"
                     on-blur="_validate"
-                    regex="^\w+@\w+(\.\w+)+$"
                     type="email"
                     required></gold-email-input>
                   <paper-input
@@ -163,8 +162,8 @@
                   <paper-button raised on-tap="saveProfile">Save Changes</paper-button>
                 </form>
               </div>
-              <event-register data-route="register" callback="[[registerCallback]]" style="max-width: 400px; margin: auto;"></event-register>
-              <event-create data-route="create" profile="[[profile]]" callback="[[eventCallback]]" on-add-event="onAddEvent" style="max-width: 400px; margin: auto;"></event-create>
+              <event-register id="register" data-route="register" callback="[[registerCallback]]" style="max-width: 400px; margin: auto;"></event-register>
+              <event-create id="create" data-route="create" profile="[[profile]]" callback="[[eventCallback]]" on-add-event="onAddEvent" style="max-width: 400px; margin: auto;"></event-create>
               <event-list data-route="list" events=[[events]]></event-list>
             </iron-pages>
         </app-header-layout>
@@ -176,8 +175,22 @@
         var template = document.getElementById('my-template');
         var firebaseAuth = template.$.firebaseAuth;
 
+        // gold-email-input and https://tools.ietf.org/html/rfc5322#section-3.4 state that
+        // a@a is a valid email address, but Firebase and firebase-auth will not accept it.
+        function massageEmailAddress(email) {
+          if (!/^\w+@\w+(\.\w+)+$/.test(email)) {
+            email = email + '.uglyhack'
+          }
+          return email;
+        }
+
         // Helper methods, to wrap firebaseAuth with promises
         function firebaseLogin(data) {
+          var massaged = {
+            email: massageEmailAddress(data.email),
+            password: data.password
+          }
+
           return new Promise(function(resolve, reject) {
             function loginSuccess(event) {
               firebaseAuth.removeEventListener('login', loginSuccess);
@@ -195,7 +208,7 @@
 
             firebaseAuth.addEventListener('login', loginSuccess);
             firebaseAuth.addEventListener('error', loginError);
-            firebaseAuth.login({email: data.email, password: data.password});
+            firebaseAuth.login({email: massaged.email, password: massaged.password});
           });
         }
 
@@ -222,12 +235,17 @@
         }
 
         function firebaseCreateUser(data) {
+          var massaged = {
+            email: massageEmailAddress(data.email),
+            password: data.password
+          }
+
           return new Promise(function(resolve, reject) {
             function createUserSuccess(event) {
               firebaseAuth.removeEventListener('user-created', createUserSuccess);
               firebaseAuth.removeEventListener('error', createUserError);
 
-              resolve(data);
+              resolve(massaged);
             }
 
             function createUserError(event) {
@@ -239,8 +257,7 @@
 
             firebaseAuth.addEventListener('user-created', createUserSuccess);
             firebaseAuth.addEventListener('error', createUserError);
-
-            firebaseAuth.createUser(data.email, data.password);
+            firebaseAuth.createUser(massaged.email, massaged.password);
           });
         }
 
@@ -267,6 +284,7 @@
         template.login = function(event, data) {
           template.$.loginForm.submit();
         };
+
         template.logout = function(event) {
           event.preventDefault();
 
@@ -316,6 +334,14 @@
               template.$.drawer.close();
             }
             template.route = path;
+
+            if (context.path === 'create') {
+              template.$.create.$.name.focus();
+            } else if (context.path === 'login') {
+              template.$.email.focus();
+            } else if (context.path === 'register') {
+              template.$.register.$.name.focus();
+            }
           }
         });
         page({

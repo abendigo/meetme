@@ -12,6 +12,12 @@
 <dom-module id="event-create">
   <template>
     <style>
+      form {
+        width: 100%;
+        max-width: 400px;
+        margin: auto;
+      }
+
       paper-button {
         background-color: antiquewhite;
       }
@@ -21,42 +27,46 @@
         color: red;
       }
     </style>
-    <form id="createEvent" is="iron-form" style="width: 400px; margin: auto;">
+    <form id="createEvent" is="iron-form">
       <paper-input
         autofocus
         error-message="The event needs a name!"
         id="name"
-        label="Name of the event (required)"
+        label="Name of the event"
         name="name"
         on-blur="_onBlurName"
         required></paper-input>
-      <paper-input-container>
+      <paper-input-container id="typecontainer">
         <label for="type">Type of the event</label>
         <input
+          id="type"
           is="iron-input"
           list="list"
-          name="type"></input>
+          name="type"
+          on-blur="_onBlurType"
+          required></input>
         <datalist id="list">
           <option value='Birthday Party'></option>
           <option value='Conference Talk'></option>
           <option value='Wedding'></option>
         </datalist>
+        <paper-input-error>What kind of event is it?</paper-input-error>
       </paper-input-container>
       <paper-input
         error-message="Every event needs a host."
         id="host"
-        label="Host (indivdual or organization) (required)"
+        label="Host (indivdual or organization)"
         name="host"
         on-blur="_onBlurHost"
         required
         value="[[profile.name]]"></paper-input>
       <paper-input-container id="startcontainer" always-float-label>
-        <label for="start">Start Date and Time (required)</label>
+        <label for="start">Start Date and Time</label>
         <input
           id="start"
           is="iron-input"
           name="start"
-          on-blur="_validateStart"
+          on-blur="_onBlurStart"
           required
           type="datetime-local"></input>
         <paper-input-error>[[startTimeError]]</paper-input-error>
@@ -67,7 +77,8 @@
           id="end"
           is="iron-input"
           name="end"
-          on-blur="_validateEnd"
+          on-blur="_onBlurEnd"
+          required
           type="datetime-local"></input>
         <paper-input-error>[[endTimeError]]</paper-input-error>
       </paper-input-container>
@@ -101,31 +112,47 @@
       _onBlurName: function(event) {
         this.$.name.validate();
       },
+      _onBlurType: function(event) {
+        this.$.startcontainer.invalid = this.$.type.validate();
+      },
       _onBlurHost: function(event) {
         this.$.host.validate();
       },
-      _validateStart: function(event) {
+      _onBlurStart: function(event) {
+        this._validateStart();
+      },
+      _onBlurEnd: function(event) {
+        this._validateEnd();
+      },
+      _validateStart: function() {
         this.$.startcontainer.invalid = false;
 
         var whenString = this.$.start.value;
-        if (whenString) {
+
+        if (!this.$.start.validity.valid) {
+          this.startTimeError = 'Invalid Date/Time.';
+          this.$.startcontainer.invalid = true;
+        } else {
           var whenDate = new Date(whenString);
 
           if (whenDate.getTime() < Date.now()) {
             this.startTimeError = 'Event must start in the future.';
             this.$.startcontainer.invalid = true;
           }
-        } else {
-          this.startTimeError = 'When does the event start?';
-          this.$.startcontainer.invalid = true;
         }
+
+        return !this.$.startcontainer.invalid;
       },
       _validateEnd: function(event) {
         this.$.endcontainer.invalid = false;
 
         var startString = this.$.start.value;
         var endString = this.$.end.value;
-        if (endString) {
+
+        if (!this.$.end.validity.valid) {
+          this.endTimeError = 'Invalid Date/Time.';
+          this.$.endcontainer.invalid = true;
+        } else {
           var startDate = new Date(startString);
           var endDate = new Date(endString);
 
@@ -134,13 +161,14 @@
             this.$.endcontainer.invalid = true;
           }
         }
+
+        return !this.$.endcontainer.invalid;
       },
 
       onSubmit: function() {
-        this._validateStart();
-        this._validateEnd();
-
-        if (!this.$.startcontainer.invalid && !this.$.endcontainer.invalid) {
+        // use bit-wise & so it validates all fields
+        if (this.$.name.validate() & this.$.type.validate() & this.$.host.validate() &
+            this._validateStart() & this._validateEnd()) {
           this.$.createEvent.submit();
         }
       },
@@ -156,18 +184,17 @@
           }
         });
 
-        var that = this;
         this.callback(data)
         .then(function() {
-          that.$.errorMessage = '';
+          this.errorMessage = '';
 
-          that.$.name.value = '';
-          that.$.host.value = that.profile.name;
-          that.$.start.value = '';
-          that.$.end.value = '';
-        }, function(error) {
-          that.$.errorMessage = error;
-        });
+          this.$.name.value = '';
+          this.$.host.value = this.profile.name;
+          this.$.start.value = '';
+          this.$.end.value = '';
+        }.bind(this), function(error) {
+          this.errorMessage = error;
+        }.bind(this));
       }
     });
   </script>
