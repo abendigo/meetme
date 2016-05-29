@@ -48,7 +48,7 @@
         }
       },
       _onBlurEmail: function() {
-        if (!this.$.email.value) {
+        if (!this.$.name.value || !this.$.email.value) {
           this.errorMessage = 'please enter a name and email address'
         } else {
           this.errorMessage = '';
