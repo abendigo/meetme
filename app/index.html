@@ -155,7 +155,7 @@
                   Optional Profile Information
                 </p>
                 <form is="iron-form">
-                  <paper-input label="Name" value="[[profile.name]]"></paper-input>
+                  <paper-input id="profilename" label="Name" value="[[profile.name]]"></paper-input>
                   <paper-input disabled label="Email Address" value="[[user.password.email]]"></paper-input>
                   <paper-input label="Organization" value="[[profile.organization]]"></paper-input>
                   <paper-input label="Title" value="[[profile.title]]"></paper-input>
@@ -339,6 +339,8 @@
               template.$.create.$.name.focus();
             } else if (context.path === 'login') {
               template.$.email.focus();
+            } else if (context.path === 'profile') {
+              template.$.profilename.focus();
             } else if (context.path === 'register') {
               template.$.register.$.name.focus();
             }
