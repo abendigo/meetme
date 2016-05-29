@@ -17,7 +17,15 @@
       <template is="dom-repeat" items=[[value]]>
         <div><span>[[item.name]]</span> - <span>[[item.email]]</span><button>Del</button></div>
       </template>
-    <input id="name" type="text"><input id="email" type="text"><button on-click="addGuest">Add</button>
+      <input id="name"
+        on-blur="_onBlurName"
+        required
+        type="text">
+      <input id="email"
+        on-blur="_onBlurEmail"
+        required
+        type="text">
+      <button on-click="addGuest">Add</button>
     <div id="errormessage">[[errorMessage]]</div>
   </template>
   <script>
@@ -29,6 +37,21 @@
         value: {
           type: Array,
           value: []
+        }
+      },
+
+      _onBlurName: function() {
+        if (!this.$.name.value) {
+          this.errorMessage = 'please enter a name and email address'
+        } else {
+          this.errorMessage = '';
+        }
+      },
+      _onBlurEmail: function() {
+        if (!this.$.email.value) {
+          this.errorMessage = 'please enter a name and email address'
+        } else {
+          this.errorMessage = '';
         }
       },
 

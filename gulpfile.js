@@ -4,6 +4,7 @@ var crisper = require('gulp-crisper');
 
 var minifyJs = require('gulp-minify');
 var minifyHtml = require('gulp-minify-html');
+var minifyInline = require('gulp-minify-inline');
 var _if = require('gulp-if');
 var replace = require('gulp-replace');
 
@@ -15,6 +16,7 @@ gulp.task('vulcanize', function() {
     .pipe(crisper())
     .pipe(_if('*.js', minifyJs()))
     .pipe(_if('*.html', replace('index.js', 'index-min.js')))
+    .pipe(_if('*.html', minifyInline()))
     .pipe(_if('*.html', minifyHtml()))
     .pipe(gulp.dest('dist'));
 });
